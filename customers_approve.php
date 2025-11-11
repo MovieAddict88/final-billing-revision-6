@@ -75,11 +75,31 @@
 		$start_date = $_POST['start_date'];
 		$due_date = $_POST['due_date'];
 		$end_date = $_POST['end_date'];
+
+		$customerInfo = $admins->getCustomerInfo($id);
+		$old_start_date = $customerInfo ? $customerInfo->start_date : null;
+        $old_end_date = $customerInfo ? $customerInfo->end_date : null;
+
 		if (!$admins->updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address,  $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date))
 		{	
 			//echo "$id $customername $email $full_name $address $contact";
 			echo "Sorry Data could not be Updated !";
 		}else {
+			if ($customerInfo && ($start_date != $old_start_date || $end_date != $old_end_date)) {
+				$packageInfo = $admins->getPackageInfo($package);
+				$amount = $packageInfo->fee;
+
+				// Format the month range for the bill
+				$r_month = date('F');
+				if (!empty($start_date) && !empty($end_date)) {
+					$start_date_obj = new DateTime($start_date);
+					$end_date_obj = new DateTime($end_date);
+					$r_month = $start_date_obj->format('F d') . ' - ' . $end_date_obj->format('F d, Y');
+				}
+
+				// Generate a new bill
+				$admins->billGenerate($id, $r_month, $amount);
+			}
 			$commons->redirectTo(SITE_PATH.'customers.php');
 		}
 

@@ -1822,17 +1822,19 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
 
             $advance_balance = $this->getAdvancePaymentBalance($customer_id);
             $balance = $amount;
+            $status = 'Unpaid';
             if ($advance_balance > 0) {
                 if ($advance_balance >= $amount) {
                     $this->useAdvancePayment($customer_id, $amount);
                     $balance = 0;
+                    $status = 'Paid';
                 } else {
                     $this->useAdvancePayment($customer_id, $advance_balance);
                     $balance = $amount - $advance_balance;
                 }
             }
-            $request = $this->dbh->prepare("INSERT IGNORE INTO payments (customer_id, r_month, amount, balance) VALUES(?,?,?,?)");
-            return $request->execute([$customer_id, $r_month, $amount, $balance]);
+            $request = $this->dbh->prepare("INSERT IGNORE INTO payments (customer_id, r_month, amount, balance, status) VALUES(?,?,?,?,?)");
+            return $request->execute([$customer_id, $r_month, $amount, $balance, $status]);
         } catch (Exception $e) {
             return false;
         }
