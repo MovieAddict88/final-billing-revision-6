@@ -1812,6 +1812,13 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
 // Bill generation of a Month
     public function billGenerate($customer_id, $r_month, $amount){
         try {
+            $customer = $this->getCustomerInfo($customer_id);
+            if ($customer && !empty($customer->start_date) && !empty($customer->end_date)) {
+                $start_date = new DateTime($customer->start_date);
+                $end_date = new DateTime($customer->end_date);
+                $r_month = $start_date->format('F d') . ' - ' . $end_date->format('F d, Y');
+            }
+
             $advance_balance = $this->getAdvancePaymentBalance($customer_id);
             $balance = $amount;
             if ($advance_balance > 0) {

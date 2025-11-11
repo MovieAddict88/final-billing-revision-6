@@ -293,10 +293,7 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'pay';
                         if (!empty($paymentHistory)) {
                             foreach ($paymentHistory as $bill) {
                                 $total_balance += $bill->balance;
-                                $g_date = new DateTime($bill->g_date);
-                                $start_date = $g_date->format('F d');
-                                $end_date = $g_date->modify('+1 month')->format('F d, Y');
-                                $billing_period_display = "$start_date - $end_date";
+                                $billing_period_display = $bill->r_month;
 
                                 echo "<tr>";
                                 echo "<td>" . htmlspecialchars($billing_period_display) . "</td>";
@@ -358,10 +355,7 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'pay';
                             if (count($unpaid_bills) > 0) {
                                 if (count($unpaid_bills) == 1) {
                                     $bill = $unpaid_bills[0];
-                                    $g_date = new DateTime($bill->g_date);
-                                    $start_date = $g_date->format('F d');
-                                    $end_date = $g_date->modify('+1 month')->format('F d, Y');
-                                    $billing_period_display = "$start_date - $end_date";
+                                    $billing_period_display = $bill->r_month;
                                     $amount_display = $bill->amount;
                                 } else {
                                     $billing_period_display = "Multiple Unpaid Bills";
@@ -378,17 +372,20 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'pay';
                                         return strtotime($b->g_date) - strtotime($a->g_date);
                                     });
                                     $latest_bill = $paid_bills[0];
-                                    $g_date = new DateTime($latest_bill->g_date);
-                                    $start_date = $g_date->format('F d');
-                                    $end_date = $g_date->modify('+1 month')->format('F d, Y');
-                                    $billing_period_display = "$start_date - $end_date";
+                                    $billing_period_display = $latest_bill->r_month;
                                     $amount_display = 0.00;
                                 }
                             }
                         } else {
                             // For new customers with no bills, assume current month's fee
                             $total_due = $packageFee;
-                            $billing_period_display = date("F d") . " - " . date("F d, Y", strtotime('+1 month'));
+                            if (!empty($info->start_date) && !empty($info->end_date)) {
+                                $start_date = new DateTime($info->start_date);
+                                $end_date = new DateTime($info->end_date);
+                                $billing_period_display = $start_date->format('F d') . ' - ' . $end_date->format('F d, Y');
+                            } else {
+                                $billing_period_display = date("F d") . " - " . date("F d, Y", strtotime('+1 month'));
+                            }
                         }
                         ?>
                         <tr>

@@ -7,10 +7,10 @@
         {
         	// Change the database setting with yours accordingly
             private $dbengine   = 'mysql';
-            private $dbhost     = 'sql100.infinityfree.com';
-            private $dbuser     = 'if0_40117326'; // Set your database username
-            private $dbpassword = 'qFteVhPBdhvkXyE'; //Set your database password
-            private $dbname     = 'if0_40117326_a';
+            private $dbhost     = 'localhost';
+            private $dbuser     = 'root'; // Set your database username
+            private $dbpassword = ' '; //Set your database password
+            private $dbname     = 'kp_db';
 
         	function __construct()
         	{

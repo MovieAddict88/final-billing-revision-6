@@ -50,6 +50,11 @@
 							$packageInfo = $admins->getPackageInfo($package_id);
 							$amount = $packageInfo->fee;
 							$r_month = date('F');
+							if (!empty($customer->start_date) && !empty($customer->end_date)) {
+								$start_date = new DateTime($customer->start_date);
+								$end_date = new DateTime($customer->end_date);
+								$r_month = $start_date->format('F d') . ' - ' . $end_date->format('F d, Y');
+							}
 							$payments = $admins->getLastMonth($customer_id);
 							if(!empty($payments)){$last_month = $payments->r_month;}
 								if(isset($last_month) && $last_month == $r_month){ ?>

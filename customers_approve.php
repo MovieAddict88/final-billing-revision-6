@@ -39,6 +39,11 @@
 					$packageInfo = $admins->getPackageInfo($package);
 					$amount = $packageInfo->fee;
 					$r_month = date('F');
+					if (!empty($start_date) && !empty($end_date)) {
+						$start_date_obj = new DateTime($start_date);
+						$end_date_obj = new DateTime($end_date);
+						$r_month = $start_date_obj->format('F d') . ' - ' . $end_date_obj->format('F d, Y');
+					}
 					$admins->billGenerate($customer_id, $r_month, $amount);
 					session::set('confirm', 'New customer added successfully!');
 				}else{
