@@ -9,7 +9,7 @@
             private $dbengine   = 'mysql';
             private $dbhost     = 'localhost';
             private $dbuser     = 'root'; // Set your database username
-            private $dbpassword = ' '; //Set your database password
+            private $dbpassword = ''; //Set your database password
             private $dbname     = 'kp_db';
 
         	function __construct()

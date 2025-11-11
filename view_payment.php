@@ -88,6 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif;
                     endif; ?>
                     <p><strong>Reference Number:</strong> <?php echo $payment->reference_number; ?></p>
+                    <?php if (!empty($payment->payment_timestamp)): ?>
+                        <p><strong>Date:</strong> <?php echo htmlspecialchars(date('Y-m-d h:i:s A', strtotime($payment->payment_timestamp))); ?></p>
+                    <?php endif; ?>
                     <?php if ($payment->screenshot && file_exists($payment->screenshot)): ?>
                         <p><strong>Screenshot:</strong></p>
                         <img src="<?php echo $payment->screenshot; ?>" alt="Transaction Screenshot" class="img-fluid">
