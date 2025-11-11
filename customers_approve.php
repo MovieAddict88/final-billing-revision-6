@@ -25,7 +25,7 @@
 			$employer_id = $_POST['employer'];
 			$start_date = $_POST['start_date'];
 			$due_date = $_POST['due_date'];
-			$end_date = date('Y-m-d', strtotime('+1 month', strtotime($start_date)));
+			$end_date = $_POST['end_date'];
 			$login_code = bin2hex(random_bytes(16));
 
 			if (isset($_POST)) 

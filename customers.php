@@ -165,7 +165,7 @@ $admins = new Admins($dbh);
                     </div>
                     <div class="form-group">
                         <label for="end_date">End Date</label>
-                        <input type="text" class="form-control" id="end_date" name="end_date" placeholder="End Date" readonly>
+                        <input type="date" class="form-control" id="end_date" name="end_date" placeholder="End Date">
                     </div>
                     <div class="form-group">
                         <label for="due_date">Due Date</label>
@@ -205,18 +205,6 @@ $admins = new Admins($dbh);
 <?php include 'includes/footer.php'; ?>
 
 <script type="text/javascript">
-
-    $('#start_date').on('change', function() {
-        var startDate = $(this).val();
-        if (startDate) {
-            var date = new Date(startDate);
-            date.setMonth(date.getMonth() + 1);
-            var year = date.getFullYear();
-            var month = ('0' + (date.getMonth() + 1)).slice(-2);
-            var day = ('0' + date.getDate()).slice(-2);
-            $('#end_date').val(year + '-' + month + '-' + day);
-        }
-    });
 
     // Form submission for adding new customer
     $('#insert_form').on('submit',function(event){
