@@ -1558,7 +1558,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                 }
 
                 $request = $this->dbh->prepare(
-                    "UPDATE payments SET status = 'Pending', balance = ?, payment_method = ?, employer_id = ?, reference_number = ?, screenshot = ?, gcash_name = ?, payment_timestamp = ? WHERE id = ?"
+                    "UPDATE payments SET status = 'Pending', balance = ?, payment_method = ?, employer_id = ?, reference_number = ?, screenshot = ?, gcash_name = ?, gcash_number = ?, payment_timestamp = ? WHERE id = ?"
                 );
                 $request->execute([
                     $new_balance,
@@ -1567,6 +1567,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                     $reference_number,
                     $screenshot_path,
                     $payment_for_this_bill,
+                    $amount,
                     $paid_at,
                     $bill_id
                 ]);
