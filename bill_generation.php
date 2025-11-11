@@ -63,27 +63,28 @@
 										<td colspan="5">Monthly bill of this month for <b><?=$customer_name?></b> was already generated !</td>
 								</tr>
 								<?php } else {
-										if (!$admins->billGenerate($customer_id, $r_month, $amount)) 
-										{    ?>
+										$bill_generated = $admins->billGenerate($customer_id, $r_month, $amount);
+										if (!$bill_generated) { ?>
 											<tr>
-													<td scope="row"><?=$customer_id?></td>
-													<td colspan="4">Bill genation for <?=$customer_name?> was not successful !</td>
-													<td><button onClick=retry() type="button" class="btn btn-info">Retry</button></td>
+												<td scope="row"><?=$customer_id?></td>
+												<td colspan="5">Bill generation for <b><?=$customer_name?></b> was not successful!</td>
 											</tr>
-											<?php
-										}else { ?>
+										<?php } else {
+											$advance_balance = $admins->getAdvancePaymentBalance($customer_id);
+											$status = ($advance_balance >= $amount) ? 'Paid' : 'Unpaid';
+											?>
 											<tr>
-													<td scope="row"><?=$customer_id?></td>
-													<td><?=$customer_name?></td>
-													<td><?=$r_month?></td>
-													<td><?=$packageInfo->name?></td>
-													<td><?=$amount?></td>
-													<td><?=$customer->due_date?></td>
-													<td><button type="button" onClick=deleteBill() class="btn btn-info">Delete</button> <button onClick=editBill() type="button" class="btn btn-info">Edit</button></td>
+												<td scope="row"><?=$customer_id?></td>
+												<td><?=$customer_name?></td>
+												<td><?=$r_month?></td>
+												<td><?=$packageInfo->name?></td>
+												<td><?=$amount?></td>
+												<td><?=$customer->due_date?></td>
+												<td><button type="button" onClick="deleteBill(<?=$bill_generated?>)" class="btn btn-danger">Delete</button></td>
 											</tr>
 									<?php }
 								}
-			  	 	?>
+								?>
 			  <?php
 			  	}
 			  } ?>
