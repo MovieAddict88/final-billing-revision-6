@@ -57,15 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <hr>
                     <h4>Payment Information</h4>
                     <p><strong>Month:</strong> <?php echo $payment->r_month; ?></p>
-                    <?php
-                        $submitted_amount = null;
-                        if (is_numeric($payment->gcash_name)) {
-                            $submitted_amount = (float)$payment->gcash_name;
-                        }
-                    ?>
-                    <?php if ($submitted_amount !== null): ?>
-                        <p><strong>Submitted Amount:</strong> <?php echo number_format($submitted_amount, 2); ?></p>
+                    <?php if (isset($payment->gcash_number) && is_numeric($payment->gcash_number) && (float)$payment->gcash_number > 0): ?>
+                        <p><strong>Submitted Amount:</strong> <?php echo number_format((float)$payment->gcash_number, 2); ?></p>
                     <?php endif; ?>
+                    <p><strong>Amount:</strong> <?php echo number_format((float)$payment->amount, 2); ?></p>
                     <p><strong>Total Paid So Far:</strong> <?php echo number_format((float)($payment->amount - $payment->balance), 2); ?></p>
                     <p><strong>New Balance:</strong> <?php echo number_format((float)$payment->balance, 2); ?></p>
                     <p><strong>Payment Method:</strong> <?php echo $payment->payment_method; ?></p>
