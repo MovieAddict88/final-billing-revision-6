@@ -76,6 +76,11 @@
 		$due_date = $_POST['due_date'];
 		$end_date = $_POST['end_date'];
 
+		$deduct_from_advance = isset($_POST['deduct_from_advance']) ? (float)$_POST['deduct_from_advance'] : 0;
+		if ($deduct_from_advance > 0) {
+			$admins->applyAdvancePaymentToBill($id, $deduct_from_advance);
+		}
+
 		$customerInfo = $admins->getCustomerInfo($id);
 		$old_start_date = $customerInfo ? $customerInfo->start_date : null;
         $old_end_date = $customerInfo ? $customerInfo->end_date : null;
@@ -208,6 +213,15 @@
 														<?php }} ?>
 												</select>
 											</div>
+											<?php
+											$advance_payment = isset($customer->advance_payment) ? (float)$customer->advance_payment : 0;
+											if ($advance_payment > 0) {
+											?>
+											<div class="form-group">
+												<label for="deduct_from_advance">Deduct from Advance (Available: <?=number_format($advance_payment, 2)?>)</label>
+												<input type="number" class="form-control" id="deduct_from_advance-<?=$customer->id?>" name="deduct_from_advance" placeholder="Enter amount to deduct" max="<?=$advance_payment?>" step="0.01">
+											</div>
+											<?php } ?>
 										</div>
 										<div class="modal-footer">
 											<button type="submit"  onclick="updateData(<?=$customer->id?>)" class="btn btn-primary">Update</button>

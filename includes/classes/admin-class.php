@@ -1407,7 +1407,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
     }
      public function fetchindIvidualBill($customer_id)
     {
-        $request = $this->dbh->prepare("SELECT * FROM `payments` where customer_id = ? and status = 'Unpaid'");
+        $request = $this->dbh->prepare("SELECT * FROM `payments` where customer_id = ? and status = 'Unpaid' ORDER BY g_date ASC");
         if ($request->execute([$customer_id])) {
             return $request->fetchAll();
         }
@@ -2083,5 +2083,60 @@ public function getDisconnectedCustomerInfo($id)
     {
         $request = $this->dbh->prepare("UPDATE reconnection_requests SET status = 'rejected' WHERE id = ?");
         return $request->execute([$id]);
+    }
+
+	public function applyAdvancePaymentToBill($customer_id, $amount)
+    {
+        if ($amount <= 0) {
+            return false;
+        }
+
+        $advance_balance = $this->getAdvancePaymentBalance($customer_id);
+        if ($amount > $advance_balance) {
+            $amount = $advance_balance;
+        }
+
+        $unpaid_bills = $this->fetchindIvidualBill($customer_id);
+
+        if (empty($unpaid_bills)) {
+            return false;
+        }
+
+        $remaining_amount_to_deduct = $amount;
+
+        foreach ($unpaid_bills as $bill) {
+            if ($remaining_amount_to_deduct <= 0) {
+                break;
+            }
+
+            $bill_balance = (float)$bill->balance;
+            $deduction = min($remaining_amount_to_deduct, $bill_balance);
+
+            $new_balance = $bill_balance - $deduction;
+            $new_status = ($new_balance <= 0) ? 'Paid' : 'Unpaid';
+
+            $this->useAdvancePayment($customer_id, $deduction);
+
+            $request = $this->dbh->prepare("UPDATE payments SET balance = ?, status = ? WHERE id = ?");
+            $request->execute([$new_balance, $new_status, $bill->id]);
+
+            $payment = (object)[
+                'id' => $bill->id,
+                'customer_id' => $customer_id,
+                'package_id' => $bill->package_id,
+                'r_month' => $bill->r_month,
+                'amount' => $bill->amount,
+                'balance' => $new_balance,
+                'payment_method' => 'Deduction',
+                'reference_number' => 'Deduction',
+                'employer_id' => $bill->employer_id,
+                'payment_timestamp' => date('Y-m-d H:i:s')
+            ];
+            $this->insertPaymentHistoryEntry($payment, $deduction);
+
+            $remaining_amount_to_deduct -= $deduction;
+        }
+
+        return true;
     }
 }
