@@ -433,12 +433,16 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'pay';
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="sr-only" for="discount">Discount</label>
-                                <input type="number" class="form-control" name="discount" id="discount" placeholder="Discount">
+                                <label class="sr-only" for="discount_name">Discount Name</label>
+                                <input type="text" class="form-control" name="discount_name" id="discount_name" placeholder="Discount Name">
                             </div>
                             <div class="form-group">
-                                <label class="sr-only" for="total">Payment</label>
-                                <input type="number" class="form-control disabled" name="total" id="total" placeholder="total" required="" value="<?= htmlspecialchars($total_due) ?>">
+                                <label class="sr-only" for="discount">Discount Amount</label>
+                                <input type="number" class="form-control" name="discount" id="discount" placeholder="Discount Amount">
+                            </div>
+                            <div class="form-group">
+                                <label class="sr-only" for="total">Amount</label>
+                                <input type="number" class="form-control" name="total" id="total" placeholder="Amount" required="" value="<?= htmlspecialchars($total_due) ?>">
                             </div>
                             <button type="submit" class="btn btn-primary">Paid</button>
                         </form>
