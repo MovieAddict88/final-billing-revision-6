@@ -22,6 +22,7 @@
 			$address = $_POST['address'];
 			$contact = $_POST['contact'];
 			$role = $_POST['role'];
+			$location = isset($_POST['location']) ? $_POST['location'] : null;
 			$profile_pic = null;
 
 			if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] == UPLOAD_ERR_OK) {
@@ -58,7 +59,7 @@
 			}elseif ($admins->adminExists($_POST['username'])) {
 				$response['status'] = 'error';
 				$response['message'] = 'This username is already in use by another admin.';
-			}elseif (!$admins->addNewAdmin($username, $password, $email, $fullname, $address, $contact, $role, null, $profile_pic)) {
+			}elseif (!$admins->addNewAdmin($username, $password, $email, $fullname, $address, $contact, $role, $location, $profile_pic)) {
 				$response['status'] = 'error';
 				$response['message'] = 'An error occured while saving the new admin.';
 			}else{
