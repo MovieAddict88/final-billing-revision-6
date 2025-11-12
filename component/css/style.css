@@ -114,19 +114,19 @@ Header
   z-index: 999;
   top: 0;
   left: 0;
-  height: 45px;
+  height: 60px;
   width: 100%;
   background: #284390; /* This is already correct */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
 }
 
 /* Add logo text color */
 .cd-logo {
-  float: left;
   display: block;
-  margin: 11px 0 0 5%;
   color: #f8cb18 !important; /* Add this line for logo text color */
 }
 
@@ -138,17 +138,16 @@ Header
 @media only screen and (min-width: 768px) {
   .cd-main-header {
     position: fixed;
-    height: 55px;
+    height: 70px;
   }
 }
-
 
 .cd-logo img {
   display: block;
 }
 @media only screen and (min-width: 768px) {
   .cd-logo {
-    margin: 16px 0 0 36px;
+    margin: 0;
   }
 }
 

@@ -84,9 +84,9 @@
     <title>CS-BILLING | <?php echo ucfirst($_SESSION['user_role'] ?? 'Admin'); ?></title>
 </head>
 <body>
-    <header class="cd-main-header" style="background: #284390; border-bottom: 3px solid #f8cb18;">
+    <header class="cd-main-header" style="background: #284390;">
         <a href="#0" class="cd-logo" style="color: #f8cb18; font-weight: 900; font-size: 18px; text-decoration: none; display: flex; align-items: center; gap: 10px;">
-            <img src="component/orig_cs.png" alt="avatar" style="border: 2px solid #f8cb18; object-fit: cover;" class="header-logo" style="width: 40px; height: 40px; object-fit: contain;">
+            <img src="component/orig_cs.png" alt="avatar" style="border: 2px solid #f8cb18; object-fit: cover; border-radius: 50%; width: 40px; height: 40px;" class="header-logo">
             CS-BILLING | <?php echo ucfirst($_SESSION['user_role'] ?? 'Admin'); ?>
         </a>
         
@@ -97,12 +97,7 @@
 
         <nav class="cd-nav">
             <ul class="cd-top-nav">
-                <li class="has-children account">
-                    <a href="#0" style="color: #f8cb18; background: #284390; font-weight: 700; text-decoration: none;">
-                        <img src="component/orig_cs.png" alt="avatar" style="border: 2px solid #f8cb18; width: 30px; height: 30px; object-fit: cover;">
-                        <?php echo $_SESSION["admin_session"]; ?> (<?php echo ucfirst($_SESSION['user_role'] ?? 'Admin'); ?>)
-                    </a>
-                </li>
+
             </ul>
         </nav>
     </header> <!-- .cd-main-header -->
