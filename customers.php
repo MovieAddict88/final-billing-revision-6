@@ -57,7 +57,7 @@ $admins = new Admins($dbh);
             </div>
             <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
                 <table class="table table-striped table-bordered" id="grid-basic" style="min-width: 1200px; width: 100%;">
-                    <thead class="thead-inverse">
+                    <thead class="thead-inverse main-header-bg">
                         <tr class="info">
                             <th style="min-width: 50px;">ID</th>
                             <th style="min-width: 100px;">Action</th>
