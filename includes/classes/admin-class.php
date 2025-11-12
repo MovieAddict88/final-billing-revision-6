@@ -1660,6 +1660,63 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         }
     }
 
+    public function processDiscount($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_date = null, $payment_time = null)
+    {
+        $paid_at = null;
+        if ($payment_date && $payment_time) {
+            $paid_at = date('Y-m-d H:i:s', strtotime("$payment_date $payment_time"));
+        }
+
+        try {
+            $this->dbh->beginTransaction();
+
+            $remaining_amount = (float)$amount;
+
+            foreach ($selected_bills as $bill_id) {
+                if ($remaining_amount <= 0) {
+                    break;
+                }
+
+                $bill = $this->getPaymentById($bill_id);
+                if (!$bill) {
+                    continue;
+                }
+
+                $due_amount = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
+
+                if ($remaining_amount >= $due_amount) {
+                    $new_balance = 0;
+                    $payment_for_this_bill = $due_amount;
+                } else {
+                    $new_balance = $due_amount - $remaining_amount;
+                    $payment_for_this_bill = $remaining_amount;
+                }
+
+                $new_status = $new_balance > 0 ? 'Partial' : 'Paid';
+
+                $request = $this->dbh->prepare(
+                    "UPDATE payments SET status = ?, balance = ?, payment_method = 'Discount', employer_id = ?, reference_number = ?, gcash_name = NULL, gcash_number = NULL, payment_timestamp = ? WHERE id = ?"
+                );
+                $request->execute([
+                    $new_status,
+                    $new_balance,
+                    $employer_id,
+                    $reference_number,
+                    $paid_at,
+                    $bill_id
+                ]);
+
+                $remaining_amount -= $payment_for_this_bill;
+            }
+
+            $this->dbh->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->dbh->rollBack();
+            return false;
+        }
+    }
+
     public function approvePayment($payment_id, $paid_at = null)
     {
         $payment = $this->getPaymentById($payment_id);
