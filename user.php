@@ -115,6 +115,10 @@
 							<option value="employer">Employer</option>
 					        </select>
 					      </div>
+					      <div class="form-group" id="location-group" style="display: none;">
+					        <label for="location">Account Manager Location</label>
+					        <input type="text" class="form-control" id="location" name="location" placeholder="Enter location">
+					      </div>
 						  <div class="form-group">
 							<label for="profile_pic">Profile Picture</label>
 							<input type="file" class="form-control" id="profile_pic" name="profile_pic">
@@ -133,6 +137,16 @@
 	include 'includes/footer.php';
 	?>
 	<script type="text/javascript">
+	$(document).ready(function(){
+		$('#role').on('change', function(){
+			if($(this).val() == 'employer'){
+				$('#location-group').show();
+			} else {
+				$('#location-group').hide();
+			}
+		});
+	});
+
 	$('#insert_form').on('submit',function(event){
 		event.preventDefault();
 		$.ajax({
