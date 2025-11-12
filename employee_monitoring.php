@@ -342,6 +342,11 @@ $monitoring_data = $admins->getEmployerMonitoringData();
                         <p class="location">
                             <i class="fas fa-map-marker-alt"></i>
                             <?php echo htmlspecialchars($data->info->location ?? ''); ?>
+                            <?php if (!empty($data->info->account_manager)): ?>
+                                <br>
+                                <i class="fas fa-user-tie"></i>
+                                <?php echo htmlspecialchars($data->info->account_manager ?? ''); ?>
+                            <?php endif; ?>
                         </p>
                     </div>
                 </div>

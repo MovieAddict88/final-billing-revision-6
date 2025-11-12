@@ -83,12 +83,12 @@ class Admins
      * 
      */
     
-    public function addNewAdmin($user_name, $user_pwd, $email, $full_name, $address, $contact, $role = 'admin', $location = null, $profile_pic = null)
+    public function addNewAdmin($user_name, $user_pwd, $email, $full_name, $address, $contact, $role = 'admin', $location = null, $profile_pic = null, $account_manager = null)
     {
-        $request = $this->dbh->prepare("INSERT INTO kp_user (user_name, user_pwd, email, full_name, address, contact, role, location, profile_pic) VALUES(?,?,?,?,?,?,?,?,?) ");
+        $request = $this->dbh->prepare("INSERT INTO kp_user (user_name, user_pwd, email, full_name, address, contact, role, location, profile_pic, account_manager) VALUES(?,?,?,?,?,?,?,?,?,?) ");
 
         // Do not forget to encrypt the pasword before saving
-        return $request->execute([$user_name, session::hashPassword($user_pwd), $email, $full_name, $address, $contact, $role, $location, $profile_pic]);
+        return $request->execute([$user_name, session::hashPassword($user_pwd), $email, $full_name, $address, $contact, $role, $location, $profile_pic, $account_manager]);
     }
     /**
      * Fetch admins
@@ -155,6 +155,7 @@ public function getEmployerMonitoringData()
             u.full_name,
             u.location,
             u.profile_pic,
+            u.account_manager,
             COUNT(DISTINCT c.id) AS total_customers,
             (SELECT COUNT(*) FROM disconnected_customers dc WHERE dc.employer_id = u.user_id) AS disconnected_clients,
             COUNT(DISTINCT CASE WHEN p.status = 'Paid' AND DATE_FORMAT(p.p_date, '%Y-%m') = :current_month THEN c.id END) AS paid_customers,
@@ -197,6 +198,7 @@ public function getEmployerMonitoringData()
                 'full_name' => $row->full_name,
                 'location' => $row->location,
                 'profile_pic' => $row->profile_pic,
+                'account_manager' => $row->account_manager,
             ],
             'stats' => [
                 'total_customers' => (int)$row->total_customers,
