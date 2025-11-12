@@ -8,8 +8,13 @@ $admins = new Admins($dbh);
 
 // Check if form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $customer_id = isset($_POST['customer']) ? $_POST['customer'] : null;
-    $total_due = isset($_POST['total']) ? (float)$_POST['total'] : 0;
+
+    // Sanitize and retrieve POST data
+    $customer_id = isset($_POST['customer']) ? filter_var($_POST['customer'], FILTER_SANITIZE_NUMBER_INT) : null;
+    $bill_ids_raw = isset($_POST['bills']) ? $_POST['bills'] : '';
+    $bill_ids = !empty($bill_ids_raw) ? explode(',', $bill_ids_raw) : [];
+    $months = isset($_POST['months']) && is_array($_POST['months']) ? $_POST['months'] : [];
+    $total_due = isset($_POST['total']) ? filter_var($_POST['total'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) : 0;
     $discount_name = isset($_POST['discount_name']) ? $_POST['discount_name'] : '';
     $discount_amount = isset($_POST['discount']) ? (float)$_POST['discount'] : 0;
 
@@ -18,6 +23,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $packageInfo = $admins->getPackageInfo($package_id);
 
     $final_amount_due = $total_due - $discount_amount;
+
+    // Check if it's an AJAX request
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        // It's an AJAX request, so process the payment
+        $bill_months = implode(', ', $months);
+        $bill_ids_string = implode(',', $bill_ids);
+        if ($admins->billPay($customer_id, $bill_ids_string, $bill_months, $discount_amount, $final_amount_due)) {
+            // After successful payment, regenerate the statement of account view
+            $info = $admins->getCustomerInfo($customer_id);
+            $id = $customer_id; // Set $id for _statement.php
+            $action = 'pay'; // Set $action for _statement.php
+            include "_statement.php";
+        } else {
+            // Handle payment failure
+            echo "Payment failed. Please try again.";
+        }
+        exit; // Terminate script execution for AJAX request
+    }
+
+    // Original non-AJAX response
 ?>
     <div class="statement-container">
         <div class="header-container">
