@@ -254,7 +254,7 @@
 									} elseif ($days == 2 || $days == 1) {
 										$style = 'style="background-color: #FDEBD0;"'; // Orange
 									} else { // Includes days 0, 3, and > 4
-										$style = 'style="background-color: #D6EAF8;"'; // Blue
+										$style = 'style="background-color: #284390; color: white;"'; // Blue
 									}
 								}
 							}

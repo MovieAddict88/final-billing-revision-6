@@ -350,7 +350,7 @@ if ($user_role == 'employer') {
                                                     } elseif ($days <= 7) {
                                                         $style = 'style="background-color: #FDEBD0;"'; // Light Orange
                                                     } else {
-                                                        $style = 'style="background-color: #D6EAF8;"'; // Light Blue
+                                                        $style = 'style="background-color: #284390; color: white;"'; // Light Blue
                                                     }
                                                 }
                                             }
