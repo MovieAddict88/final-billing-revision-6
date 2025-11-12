@@ -683,6 +683,18 @@ public function countCustomersByEmployer($employer_id)
         return $request->execute([$id]);
     }
 
+    public function verifyPassword($userId, $password)
+    {
+        $request = $this->dbh->prepare("SELECT user_pwd FROM kp_user WHERE user_id = ?");
+        if ($request->execute([$userId])) {
+            $data = $request->fetch();
+            if ($data && session::passwordMatch($password, $data->user_pwd)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
 
     /**

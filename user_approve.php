@@ -71,11 +71,18 @@
 			exit();
 	}else if($page == 'del'){
 		$id = $_POST['id'];
-		if (!$admins->deleteUser($id)) 
-		{
-			echo "Sorry Data could not be deleted !";
-		}else {
-			echo "Well! You've successfully deleted a user!";
+		$password = $_POST['password'];
+		$admin_id = $_SESSION['user_id'];
+
+		if ($admins->verifyPassword($admin_id, $password)) {
+			if (!$admins->deleteUser($id))
+			{
+				echo "Sorry Data could not be deleted !";
+			}else {
+				echo "Well! You've successfully deleted a user!";
+			}
+		} else {
+			echo "Invalid password!";
 		}
 
 	}else if($page == 'edit'){

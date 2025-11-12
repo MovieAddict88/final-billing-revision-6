@@ -166,12 +166,14 @@
     }
 	function delData(del_id){
 		var id = del_id;
-		if(confirm("Are you sure you want to delete this user?")){
+		var password = prompt("Please enter your password to delete this user:");
+		if (password != null) {
 			$.ajax({
 				method:"POST",
 				url: "user_approve.php?p=del",
-				data: "id="+id,
+				data: {id: id, password: password},
 				success: function (data){
+					alert(data);
 					viewData();
 				}
 			});
