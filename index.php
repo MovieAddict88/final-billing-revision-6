@@ -89,7 +89,7 @@ if ($user_role == 'employer') {
     }
     
     .professional-table thead th {
-        background: #2c3e50;
+        background: #284390;
         color: white;
         font-weight: 600;
         padding: 12px 15px;
