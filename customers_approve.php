@@ -224,7 +224,7 @@
 						</div>
 						<a href="customer_details.php?id=<?=$customer->id?>" class="btn btn-info btn-sm btn-action">VIEW</a>
 						<button type="submit" id="delete" onclick="delData(<?=$customer->id ?>)" class="btn btn-warning btn-sm btn-action">DELETE</button>
-						<button type="button" class="btn btn-primary btn-sm btn-action remark-btn" data-customer-id="<?=$customer->id?>" data-remarks="<?=htmlspecialchars($customer->remarks ?? '')?>">REMARK</button>
+						<button type="button" class="btn btn-primary btn-sm btn-action remark-btn" data-customer-id="<?=$customer->id?>" data-remarks="<?php echo htmlspecialchars($customer->remarks ?? '', ENT_QUOTES); ?>">REMARK</button>
 						<?php
 						$dueDate = $customer->due_date;
 						$endDate = $customer->end_date;
