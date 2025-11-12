@@ -379,7 +379,7 @@ if ($user_role == 'employer') {
                                                     <a href="manual_payment.php?customer=<?php echo $customer->id; ?>" class="btn btn-success btn-sm action-btn">Pay</a>
                                                     <a href="discount.php?customer=<?php echo $customer->id; ?>" class="btn btn-info btn-sm action-btn">Discount</a>
                                                 <?php endif; ?>
-												<button type="button" class="btn btn-primary btn-sm action-btn" onclick="openRemarkModal(<?php echo $customer->id; ?>, '<?php echo htmlspecialchars($customer->remarks); ?>')">Remark</button>
+												<button type="button" class="btn btn-primary btn-sm action-btn" onclick='openRemarkModal(<?php echo $customer->id; ?>, <?php echo json_encode($customer->remarks); ?>)'>Remark</button>
 												<?php
 													$dueDate = new DateTime($customer->due_date);
 													$today = new DateTime();
@@ -389,7 +389,7 @@ if ($user_role == 'employer') {
 												?>
                                             </div>
                                         </td>
-										<td><?php echo htmlspecialchars($customer->remarks); ?></td>
+										<td><?php echo htmlspecialchars($customer->remarks ?? ''); ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>

@@ -428,6 +428,7 @@ public function fetchCustomersByEmployerPage($employer_id, $offset = 0, $limit =
     $request = $this->dbh->prepare("
         SELECT
             c.*,
+            c.remarks,
             COALESCE(p.total_paid, 0) as total_paid,
             COALESCE(p.total_balance, 0) as total_balance,
             COALESCE(ap.advance_payment, 0) as advance_payment,
