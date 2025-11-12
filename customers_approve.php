@@ -226,7 +226,6 @@
 						<button type="submit" id="delete" onclick="delData(<?=$customer->id ?>)" class="btn btn-warning btn-sm btn-action">DELETE</button>
 						<button type="button" class="btn btn-primary btn-sm btn-action remark-btn" data-customer-id="<?=$customer->id?>" data-remarks="<?=htmlspecialchars($customer->remarks ?? '')?>">REMARK</button>
 						<?php
-						$showDisconnect = false;
 						$dueDate = $customer->due_date;
 						$endDate = $customer->end_date;
 						$status = $admins->getCustomerStatus($customer->id);
@@ -245,14 +244,12 @@
 							// Logic is active only after the end date has passed.
 							if ($today > $endDateObj) {
 								if ($dueDateObj < $today) {
-									$showDisconnect = true; // Overdue
 									$style = 'style="background-color: #8B0000; color: white;"'; // Dark Red
 								} else {
 									$interval = $today->diff($dueDateObj);
 									$days = $interval->days;
 
 									if ($days == 4) {
-										$showDisconnect = true;
 										$style = 'style="background-color: #FADBD8;"'; // Red
 									} elseif ($days == 2 || $days == 1) {
 										$style = 'style="background-color: #FDEBD0;"'; // Orange
@@ -262,10 +259,8 @@
 								}
 							}
 						}
-
-						if ($showDisconnect): ?>
+						?>
 						<a href="disconnect_customer.php?customer_id=<?=$customer->id?>" class="btn btn-danger btn-sm btn-action">DISCONNECT</a>
-						<?php endif; ?>
 					</td>
 					<td class="search"><?=$customer->full_name?></td>
 					<td class="search"><?=$customer->employer_name ? $customer->employer_name : 'N/A'?></td>
