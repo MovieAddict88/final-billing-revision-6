@@ -194,6 +194,7 @@ $admins = new Admins($dbh);
                     <label>Remark</label>
                     <textarea name="remark" id="remark" class="form-control"></textarea>
                     <input type="hidden" name="customer_id" id="customer_id_remark">
+                    <input type="hidden" name="return_page" value="customers.php">
                     <br>
                     <input type="submit" name="add_remark" id="add_remark_btn" class="btn btn-primary" value="Add Remark">
                 </form>
