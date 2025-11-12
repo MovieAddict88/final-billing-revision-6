@@ -1706,6 +1706,33 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                     $bill_id
                 ]);
 
+                // Create a payment-like object for history entry
+                $payment_info_for_history = (object)[
+                    'id' => $bill_id,
+                    'customer_id' => $customer_id,
+                    'employer_id' => $employer_id,
+                    'package_id' => $bill->package_id,
+                    'r_month' => $bill->r_month,
+                    'amount' => $bill->amount,
+                    'balance' => $new_balance,
+                    'payment_method' => 'Discount',
+                    'reference_number' => $reference_number,
+                    'payment_timestamp' => $paid_at
+                ];
+                $this->insertPaymentHistoryEntry($payment_info_for_history, $payment_for_this_bill, $paid_at);
+
+                // Insert into billings for invoice ledger
+                $billingRequest = $this->dbh->prepare(
+                    "INSERT INTO billings (customer_id, bill_id, bill_month, discount, bill_amount) VALUES (?, ?, ?, ?, ?)"
+                );
+                $billingRequest->execute([
+                    $customer_id,
+                    $bill_id,
+                    $bill->r_month,
+                    $payment_for_this_bill,
+                    0
+                ]);
+
                 $remaining_amount -= $payment_for_this_bill;
             }
 
