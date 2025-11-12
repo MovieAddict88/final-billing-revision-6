@@ -1851,26 +1851,68 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
     {   
         try {
             $this->dbh->beginTransaction();
-                $request = $this->dbh->prepare("INSERT INTO billings (customer_id, bill_id, bill_month, discount, bill_amount) VALUES(?,?,?,?,?)");
-                $request->execute([$customer_id, $bill_id, $bill_months, $discount, $bill_amount]);
+            $request = $this->dbh->prepare("INSERT INTO billings (customer_id, bill_id, bill_month, discount, bill_amount) VALUES(?,?,?,?,?)");
+            $request->execute([$customer_id, $bill_id, $bill_months, $discount, $bill_amount]);
 
-                $values = explode(',', $bill_id);
-                $placeholder = rtrim(str_repeat('?, ', count($values)), ', ');
+            $bill_ids = explode(',', $bill_id);
 
-                // For each payment, compute paid portion and insert into ledger
-                foreach ($values as $pid) {
-                    $payment = $this->getPaymentById($pid);
-                    if ($payment) {
-                        $paid_amount = (float)$payment->amount; // settling in full via billPay
-                        $payment->balance = 0.0;
-                        $payment->payment_method = 'Admin';
-                        $payment->reference_number = null;
-                        $this->insertPaymentHistoryEntry($payment, $paid_amount);
+            // Note: Assuming $bill_amount from post_approve.php is amount_paid.
+            // The call in post_approve.php seems to be passing `amount_paid - discount`.
+            // Correcting for this here by adding discount back to get amount_paid.
+            $amount_paid = (float)$bill_amount + (float)$discount;
+
+            $total_credit = $amount_paid + (float)$discount;
+
+            // A transaction can have a discount, a payment, or both.
+            // We distribute the discount first, then the payment.
+
+            $remaining_discount = (float)$discount;
+            if ($remaining_discount > 0) {
+                foreach($bill_ids as $pid) {
+                    if ($remaining_discount <= 0) break;
+                    $bill = $this->getPaymentById($pid);
+                    if ($bill) {
+                        $due = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
+                        $applied_discount = min($due, $remaining_discount);
+                        $new_balance = $due - $applied_discount;
+                        $new_status = ($new_balance > 0) ? 'Balance' : 'Paid';
+
+                        $this->dbh->prepare("UPDATE payments SET balance = ?, status = ? WHERE id = ?")->execute([$new_balance, $new_status, $pid]);
+                        $remaining_discount -= $applied_discount;
+
+                        // History for discount
+                        $bill->balance = $new_balance;
+                        $bill->payment_method = 'Discount';
+                        $bill->reference_number = 'Discount';
+                        $this->insertPaymentHistoryEntry($bill, $applied_discount);
                     }
                 }
+            }
 
-                $request2 = $this->dbh->prepare("UPDATE payments SET status='Paid', balance = 0, p_date = NOW() WHERE id IN ($placeholder)");
-                $request2->execute($values);
+            $remaining_payment = $amount_paid;
+            if ($remaining_payment > 0) {
+                foreach($bill_ids as $pid) {
+                    if ($remaining_payment <= 0) break;
+                    $bill = $this->getPaymentById($pid); // refetch for updated balance
+                    if ($bill && $bill->status != 'Paid') {
+                         $due = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
+                         if ($due <= 0) continue;
+                         $applied_payment = min($due, $remaining_payment);
+                         $new_balance = $due - $applied_payment;
+                         $new_status = ($new_balance > 0) ? 'Balance' : 'Paid';
+
+                         $this->dbh->prepare("UPDATE payments SET balance = ?, status = ?, p_date = NOW() WHERE id = ?")->execute([$new_balance, $new_status, $pid]);
+                         $remaining_payment -= $applied_payment;
+
+                         // History for payment
+                        $bill->balance = $new_balance;
+                        $bill->payment_method = 'Admin';
+                        $bill->reference_number = '';
+                        $this->insertPaymentHistoryEntry($bill, $applied_payment);
+                    }
+                }
+            }
+
             $this->dbh->commit();
             return true;
         } catch (Exception $e) {
