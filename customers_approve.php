@@ -261,6 +261,7 @@
 						}
 						?>
 						<a href="disconnect_customer.php?customer_id=<?=$customer->id?>" class="btn btn-danger btn-sm btn-action">DISCONNECT</a>
+						<a href="discount.php?customer=<?=$customer->id?>" class="btn btn-info btn-sm btn-action">DISCOUNT</a>
 					</td>
 					<td class="search"><?=$customer->full_name?></td>
 					<td class="search"><?=$customer->employer_name ? $customer->employer_name : 'N/A'?></td>
