@@ -326,7 +326,7 @@ $monitoring_data = $admins->getEmployerMonitoringData();
     .monitoring-container .employer-card:nth-child(4) { animation-delay: 0.4s; }
 </style>
 
-<h1 class="page-title">Employee Monitoring</h1>
+<h1 class="page-title">Account Manager Monitoring</h1>
 
 <div class="monitoring-container">
     <?php if (!empty($monitoring_data)): ?>
