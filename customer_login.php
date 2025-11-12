@@ -18,7 +18,7 @@ require_once 'includes/customer_header.php';
 }
 </style>
 
-<div class="container">
+<div class="container" style="margin-top: 80px;">
     <div class="row justify-content-center">
         <div class="col-md-6 col-sm-12">
             <div class="card mt-5">

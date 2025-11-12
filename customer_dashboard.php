@@ -29,7 +29,7 @@ $ledger = $admins->fetchPaymentHistoryByCustomer($customer_id);
 
 ?>
 
-<div class="container">
+<div class="container" style="margin-top: 80px;">
     <div class="row">
         <div class="col-md-12">
             <div class="card mt-5">
