@@ -119,6 +119,11 @@ Header
   background: #284390; /* This is already correct */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.main-header-bg {
+  background: #284390;
+  color: #ffffff;
   display: flex;
   align-items: center;
   padding: 0 20px;
