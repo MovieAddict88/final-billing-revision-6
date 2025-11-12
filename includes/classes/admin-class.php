@@ -1823,18 +1823,42 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
             $advance_balance = $this->getAdvancePaymentBalance($customer_id);
             $balance = $amount;
             $status = 'Unpaid';
+            $paid_from_advance = 0;
+
             if ($advance_balance > 0) {
                 if ($advance_balance >= $amount) {
                     $this->useAdvancePayment($customer_id, $amount);
+                    $paid_from_advance = $amount;
                     $balance = 0;
                     $status = 'Paid';
                 } else {
                     $this->useAdvancePayment($customer_id, $advance_balance);
+                    $paid_from_advance = $advance_balance;
                     $balance = $amount - $advance_balance;
                 }
             }
+
             $request = $this->dbh->prepare("INSERT IGNORE INTO payments (customer_id, r_month, amount, balance, status) VALUES(?,?,?,?,?)");
-            return $request->execute([$customer_id, $r_month, $amount, $balance, $status]);
+            $request->execute([$customer_id, $r_month, $amount, $balance, $status]);
+            $payment_id = $this->dbh->lastInsertId();
+
+            if ($paid_from_advance > 0) {
+                $payment = (object)[
+                    'id' => $payment_id,
+                    'customer_id' => $customer_id,
+                    'package_id' => $customer->package_id,
+                    'r_month' => $r_month,
+                    'amount' => $amount,
+                    'balance' => $balance,
+                    'payment_method' => 'Deduction',
+                    'reference_number' => 'Deduction',
+                    'employer_id' => $customer->employer_id,
+                    'payment_timestamp' => date('Y-m-d H:i:s')
+                ];
+                $this->insertPaymentHistoryEntry($payment, $paid_from_advance);
+            }
+
+            return true;
         } catch (Exception $e) {
             return false;
         }
