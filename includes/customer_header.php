@@ -14,30 +14,45 @@
     <script src="component/js/modernizr.js"></script> <!-- Modernizr -->
     <title>CS-BILLING | Customer Portal</title>
     <style>
+        /* Header Background Color: #284390 */
+        /* Header Text Color: #f8cb18 */
+
         .cd-main-header {
-            background-color: #284390 !important;
-            border-bottom: 3px solid #f8cb18 !important;
+            background: #284390;
+            border-bottom: 3px solid #f8cb18;
         }
-        .cd-logo {
-            color: #f8cb18 !important;
-            font-weight: bold !important;
-            display: flex !important;
-            align-items: center !important;
-            gap: 10px !important;
-            text-decoration: none !important;
+
+        .cd-main-header .cd-logo {
+            color: #f8cb18;
+            font-weight: 900;
+            font-size: 18px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
+
         .header-logo {
-            width: 40px !important;
-            height: 40px !important;
-            object-fit: contain !important;
-            display: block !important;
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            display: block;
+            border-radius: 50%;
+            border: 2px solid #f8cb18;
+        }
+
+        /* Ensure all text within the logo link has the correct color and weight */
+        .cd-main-header .cd-logo,
+        .cd-main-header .cd-logo * {
+            color: #f8cb18;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 <header class="cd-main-header">
     <a href="customer_dashboard.php" class="cd-logo">
-        <img src="component/orig_cs.png" alt="avatar" style="border: 2px solid #f8cb18; object-fit: cover;" class="header-logo" style="width: 40px; height: 40px; object-fit: contain;">
+        <img src="component/orig_cs.png" alt="avatar" class="header-logo">
         CS-BILLING | Customer Portal
     </a>
 </header>
