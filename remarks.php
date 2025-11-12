@@ -7,11 +7,12 @@ $admins = new Admins($dbh);
 if (isset($_POST['add_remark'])) {
     $customer_id = $_POST['customer_id'];
     $remark = $_POST['remark'];
+    $return_page = $_POST['return_page'] ?? 'customers.php';
 
     if ($admins->addRemark($customer_id, $remark)) {
-        header("Location: customers.php?success=Remark added successfully");
+        header("Location: " . $return_page . "?success=Remark added successfully");
     } else {
-        header("Location: customers.php?error=Failed to add remark");
+        header("Location: " . $return_page . "?error=Failed to add remark");
     }
 }
 if (isset($_POST['update_remark'])) {
