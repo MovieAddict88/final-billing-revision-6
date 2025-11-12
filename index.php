@@ -387,7 +387,7 @@ if ($user_role == 'employer') {
 												?>
                                             </div>
                                         </td>
-										<td><?php echo htmlspecialchars($customer->remarks); ?></td>
+										<td><?php echo htmlspecialchars($customer->remarks ?? ''); ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
