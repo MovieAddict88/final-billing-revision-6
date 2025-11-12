@@ -71,12 +71,21 @@
 			exit();
 	}else if($page == 'del'){
 		$id = $_POST['id'];
-		if (!$admins->deleteUser($id)) 
-		{
-			echo "Sorry Data could not be deleted !";
-		}else {
-			echo "Well! You've successfully deleted a user!";
+		$password = $_POST['password'];
+		$response = array();
+
+		$result = $admins->deleteUser($id, $password);
+
+		if ($result === true) {
+			$response['status'] = 'success';
+			$response['message'] = 'User successfully deleted!';
+		} else {
+			$response['status'] = 'error';
+			$response['message'] = $result;
 		}
+		header('Content-Type: application/json');
+		echo json_encode($response);
+		exit();
 
 	}else if($page == 'edit'){
 		$username = $_POST['username'];
