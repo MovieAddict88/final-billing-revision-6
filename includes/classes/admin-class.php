@@ -742,10 +742,69 @@ public function countCustomersByEmployer($employer_id)
     /**
      * Update Customers
      */
-    public function updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date)
+    public function updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date, $exceeding_payment = 0)
     {
         $request = $this->dbh->prepare("UPDATE customers SET full_name =?, nid =?, account_number =?, address =?, conn_location= ?, email =?, package_id =?, ip_address=?, conn_type=?, contact=?, employer_id = ?, start_date = ?, due_date = ?, end_date = ? WHERE id =?");
-        return $request->execute([$full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date, $id]);
+        $result = $request->execute([$full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date, $id]);
+
+        if ($result && $exceeding_payment > 0) {
+            $this->applyExceedingPaymentToBill($id, $exceeding_payment);
+        }
+
+        return $result;
+    }
+
+    public function applyExceedingPaymentToBill($customer_id, $amount)
+    {
+        if ($amount <= 0) {
+            return false;
+        }
+
+        $customer = $this->getCustomerInfo($customer_id);
+        $advance_balance = $customer ? (float)$customer->advance_payment : 0;
+
+        if ($amount > $advance_balance) {
+            // Amount to use cannot be greater than the available advance payment
+            return false;
+        }
+
+        // Fetch the oldest unpaid bill
+        $request = $this->dbh->prepare("SELECT * FROM payments WHERE customer_id = ? AND status IN ('Unpaid', 'Balance') ORDER BY id ASC LIMIT 1");
+        if ($request->execute([$customer_id])) {
+            $bill = $request->fetch();
+            if ($bill) {
+                $due_amount = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
+                $payment_for_this_bill = min($amount, $due_amount);
+
+                // Update bill
+                $new_balance = $due_amount - $payment_for_this_bill;
+                $new_status = ($new_balance <= 0) ? 'Paid' : 'Balance';
+                $update_request = $this->dbh->prepare("UPDATE payments SET balance = ?, status = ? WHERE id = ?");
+                $update_request->execute([$new_balance, $new_status, $bill->id]);
+
+                // Update advance payment balance
+                $this->useAdvancePayment($customer_id, $payment_for_this_bill);
+
+                // Record in payment history
+                $payment = (object)[
+                    'id' => $bill->id,
+                    'customer_id' => $customer_id,
+                    'package_id' => $bill->package_id,
+                    'r_month' => $bill->r_month,
+                    'amount' => $bill->amount,
+                    'balance' => $new_balance,
+                    'payment_method' => 'Exceeding Payment',
+                    'reference_number' => 'Deduction from Exceeding Payment',
+                    'employer_id' => $customer->employer_id,
+                    'payment_timestamp' => date('Y-m-d H-i-s')
+                ];
+                $this->insertPaymentHistoryEntry($payment, $payment_for_this_bill);
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function addRemark($customer_id, $remark)
