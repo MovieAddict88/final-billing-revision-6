@@ -279,11 +279,12 @@ $admins = new Admins($dbh);
         var start_date = $('#start_date-'+str).val();
         var due_date = $('#due_date-'+str).val();
         var end_date = $('#end_date-'+str).val();
+        var exceeding_payment = $('#exceeding_payment-'+str).val();
         
         $.ajax({
             method:"POST",
             url: "customers_approve.php?p=edit",
-            data: "full_name="+full_name+"&nid="+nid+"&account_number="+account_number+"&address="+address+"&conn_location="+conn_location+"&email="+email+"&package="+package+"&ip_address="+ip_address+"&conn_type="+conn_type+"&contact="+contact+"&employer="+employer+"&id="+id+"&start_date="+start_date+"&due_date="+due_date+"&end_date="+end_date,
+            data: "full_name="+full_name+"&nid="+nid+"&account_number="+account_number+"&address="+address+"&conn_location="+conn_location+"&email="+email+"&package="+package+"&ip_address="+ip_address+"&conn_type="+conn_type+"&contact="+contact+"&employer="+employer+"&id="+id+"&start_date="+start_date+"&due_date="+due_date+"&end_date="+end_date+"&exceeding_payment="+exceeding_payment,
             success: function (data){
                 viewData();
             }
