@@ -377,7 +377,7 @@ if ($user_role == 'employer') {
                                                 <?php elseif ($customer->status != 'Paid' && $customer->status != 'Partial'): ?>
                                                     <a href="manual_payment.php?customer=<?php echo $customer->id; ?>" class="btn btn-success btn-sm action-btn">Pay</a>
                                                 <?php endif; ?>
-												<button type="button" class="btn btn-primary btn-sm action-btn" onclick="openRemarkModal(<?php echo $customer->id; ?>, '<?php echo htmlspecialchars($customer->remarks); ?>')">Remark</button>
+												<button type="button" class="btn btn-primary btn-sm action-btn" onclick='openRemarkModal(<?php echo $customer->id; ?>, <?php echo json_encode($customer->remarks); ?>)'>Remark</button>
 												<?php
 													$dueDate = new DateTime($customer->due_date);
 													$today = new DateTime();
