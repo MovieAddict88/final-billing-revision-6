@@ -179,7 +179,7 @@
 											</div>
 											<div class="form-group">
 												<label for="end_date">End Date</label>
-												<input type="text" class="form-control" id="end_date-<?=$customer->id?>"   value="<?=$customer->end_date?>" readonly>
+												<input type="date" class="form-control" id="end_date-<?=$customer->id?>"   value="<?=$customer->end_date?>">
 											</div>
 											<div class="form-group">
 												<label for="due_date">Due Date</label>
