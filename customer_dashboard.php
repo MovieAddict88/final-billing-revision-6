@@ -62,13 +62,13 @@ $ledger = $admins->fetchPaymentHistoryByCustomer($customer_id);
                     <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
-                            <tr>
-                                <th>Month</th>
-                                <th>Amount</th>
-                                <th>Paid</th>
-                                <th>Balance</th>
-                                <th>Status</th>
-                                <th>Paid On</th>
+                            <tr style="background-color: #284390; color: white;">
+                                <th style="background-color: #284390; color: white;">Month</th>
+                                <th style="background-color: #284390; color: white;">Amount</th>
+                                <th style="background-color: #284390; color: white;">Paid</th>
+                                <th style="background-color: #284390; color: white;">Balance</th>
+                                <th style="background-color: #284390; color: white;">Status</th>
+                                <th style="background-color: #284390; color: white;">Paid On</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -106,16 +106,16 @@ $ledger = $admins->fetchPaymentHistoryByCustomer($customer_id);
                     <div class="table-responsive">
                     <table class="table table-striped">
                         <thead>
-                            <tr>
-                                <th>Time</th>
-                                <th>Billing Month</th>
-                                <th>Package</th>
-                                <th>Amount</th>
-                                <th>Paid Amount</th>
-                                <th>Balance</th>
-                                <th>Payment Method</th>
-                                <th>Reference Number</th>
-                                <th>Employer</th>
+                            <tr style="background-color: #284390; color: white;">
+                                <th style="background-color: #284390; color: white;">Time</th>
+                                <th style="background-color: #284390; color: white;">Billing Month</th>
+                                <th style="background-color: #284390; color: white;">Package</th>
+                                <th style="background-color: #284390; color: white;">Amount</th>
+                                <th style="background-color: #284390; color: white;">Paid Amount</th>
+                                <th style="background-color: #284390; color: white;">Balance</th>
+                                <th style="background-color: #284390; color: white;">Payment Method</th>
+                                <th style="background-color: #284390; color: white;">Reference Number</th>
+                                <th style="background-color: #284390; color: white;">Employer</th>
                             </tr>
                         </thead>
                         <tbody>
