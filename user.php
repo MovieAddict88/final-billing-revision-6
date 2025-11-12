@@ -129,6 +129,32 @@
 		</div>		
 	</div>
 
+	<!-- Delete modal for users -->
+	<div id="delete_data_Modal" class="modal fade">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4>Delete User</h4>
+				</div>
+				<div class="modal-body">
+					<p>Are you sure you want to delete this user? Please enter your password to confirm.</p>
+					<form method="POST" id="delete_form">
+						<div class="form-group">
+							<label for="password">Password</label>
+							<input type="password" class="form-control" id="delete_password" name="password" placeholder="Password" required>
+						</div>
+						<input type="hidden" id="delete_user_id" name="id">
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger" id="confirm_delete">Delete</button>
+					<a href="#" class="btn btn-warning" data-dismiss="modal">Cancel</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<?php
 	include 'includes/footer.php';
 	?>
@@ -165,18 +191,32 @@
         });
     }
 	function delData(del_id){
-		var id = del_id;
-		if(confirm("Are you sure you want to delete this user?")){
-			$.ajax({
-				method:"POST",
-				url: "user_approve.php?p=del",
-				data: "id="+id,
-				success: function (data){
-					viewData();
-				}
-			});
-		}
+		$('#delete_user_id').val(del_id);
+		$('#delete_data_Modal').modal('show');
 	}
+
+	$('#confirm_delete').on('click', function(event){
+		event.preventDefault();
+		var id = $('#delete_user_id').val();
+		var password = $('#delete_password').val();
+		$.ajax({
+			method:"POST",
+			url: "user_approve.php?p=del",
+			data: {id: id, password: password},
+			dataType: "json",
+			success: function (data){
+				if (data.status == 'success') {
+					$('#delete_data_Modal').modal('hide');
+					$('#delete_form')[0].reset();
+					viewData();
+					alert(data.message);
+				} else {
+					alert(data.message);
+				}
+			}
+		});
+	});
+
 	function updateData(str){
 		var user_id = str;
 		var username = $('#usr-'+str).val();

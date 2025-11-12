@@ -677,10 +677,28 @@ public function countCustomersByEmployer($employer_id)
     /**
      * Delete an user
      */
-    public function deleteUser($id)
+    public function deleteUser($id, $password)
     {
-        $request = $this->dbh->prepare("DELETE FROM kp_user WHERE user_id = ?");
-        return $request->execute([$id]);
+        $request = $this->dbh->prepare("SELECT * FROM kp_user WHERE user_id = ?");
+        if ($request->execute([$id])) {
+            $user = $request->fetch();
+            if (!$user) {
+                return "User not found.";
+            }
+
+            // Assuming session::passwordMatch is available and works like password_verify
+            if (session::passwordMatch($password, $user->user_pwd)) {
+                $delete_request = $this->dbh->prepare("DELETE FROM kp_user WHERE user_id = ?");
+                if ($delete_request->execute([$id])) {
+                    return true;
+                } else {
+                    return "Sorry, data could not be deleted.";
+                }
+            } else {
+                return "Incorrect password.";
+            }
+        }
+        return "An error occurred.";
     }
 
 
