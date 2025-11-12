@@ -59,26 +59,26 @@ $admins = new Admins($dbh);
                 <table class="table table-striped table-bordered" id="grid-basic" style="min-width: 1200px; width: 100%;">
                     <thead class="thead-inverse">
                         <tr class="info">
-                            <th style="min-width: 50px;">ID</th>
-                            <th style="min-width: 100px;">Action</th>
-                            <th style="min-width: 150px;">Name</th>
-                            <th style="min-width: 150px;">Employer</th>
-                            <th style="min-width: 120px;">NID</th>
-                            <th style="min-width: 200px;">ADDRESS</th>
-                            <th style="min-width: 120px;">Package</th>
-                            <th style="min-width: 120px;">IP</th>
-                            <th style="min-width: 200px;">Email</th>
-                            <th style="min-width: 120px;">Contact</th>
-                            <th style="min-width: 100px;">Type</th>
-                            <th style="min-width: 100px;">Status</th>
-                            <th style="min-width: 120px;">Amount Paid</th>
-                            <th style="min-width: 120px;">Balance</th>
-                            <th style="min-width: 120px;">Exceeding Payment</th>
-                            <th style="min-width: 150px;">Login Code</th>
-                            <th style="min-width: 120px;">Start Date</th>
-                            <th style="min-width: 120px;">End Date</th>
-                            <th style="min-width: 120px;">Due Date</th>
-                            <th style="min-width: 200px;">Remarks</th>
+                            <th style="min-width: 50px; background-color: #284390; color: white;">ID</th>
+                            <th style="min-width: 100px; background-color: #284390; color: white;">Action</th>
+                            <th style="min-width: 150px; background-color: #284390; color: white;">Name</th>
+                            <th style="min-width: 150px; background-color: #284390; color: white;">Employer</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">NID</th>
+                            <th style="min-width: 200px; background-color: #284390; color: white;">ADDRESS</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">Package</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">IP</th>
+                            <th style="min-width: 200px; background-color: #284390; color: white;">Email</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">Contact</th>
+                            <th style="min-width: 100px; background-color: #284390; color: white;">Type</th>
+                            <th style="min-width: 100px; background-color: #284390; color: white;">Status</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">Amount Paid</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">Balance</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">Exceeding Payment</th>
+                            <th style="min-width: 150px; background-color: #284390; color: white;">Login Code</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">Start Date</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">End Date</th>
+                            <th style="min-width: 120px; background-color: #284390; color: white;">Due Date</th>
+                            <th style="min-width: 200px; background-color: #284390; color: white;">Remarks</th>
                         </tr>
                     </thead>
                     <tbody>
