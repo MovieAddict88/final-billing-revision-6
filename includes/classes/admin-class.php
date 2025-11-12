@@ -830,6 +830,72 @@ public function countCustomersByEmployer($employer_id)
         }
     }
 
+    public function processDiscount($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_date, $payment_time)
+    {
+        $paid_at = null;
+        if ($payment_date && $payment_time) {
+            $paid_at = date('Y-m-d H:i:s', strtotime("$payment_date $payment_time"));
+        }
+
+        try {
+            $this->dbh->beginTransaction();
+
+            $remaining_discount = (float)$amount;
+
+            foreach ($selected_bills as $bill_id) {
+                if ($remaining_discount <= 0) {
+                    break;
+                }
+
+                $bill = $this->getPaymentById($bill_id);
+                if (!$bill) {
+                    continue;
+                }
+
+                $due_amount = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
+
+                $discount_for_this_bill = min($remaining_discount, $due_amount);
+
+                $new_balance = $due_amount - $discount_for_this_bill;
+                $new_status = ($new_balance <= 0) ? 'Paid' : 'Balance';
+
+                $request = $this->dbh->prepare(
+                    "UPDATE payments SET status = ?, balance = ? WHERE id = ?"
+                );
+                $request->execute([
+                    $new_status,
+                    $new_balance,
+                    $bill_id
+                ]);
+
+                // Log the discount in payment history
+                $payment = (object)[
+                    'id' => $bill->id,
+                    'customer_id' => $customer_id,
+                    'package_id' => $bill->package_id,
+                    'r_month' => $bill->r_month,
+                    'amount' => $bill->amount,
+                    'balance' => $new_balance,
+                    'payment_method' => 'Discount',
+                    'reference_number' => $reference_number,
+                    'employer_id' => $employer_id,
+                    'payment_timestamp' => $paid_at
+                ];
+                $this->insertPaymentHistoryEntry($payment, $discount_for_this_bill);
+
+
+                $remaining_discount -= $discount_for_this_bill;
+            }
+
+            $this->dbh->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->dbh->rollBack();
+            error_log("Process discount error: " . $e->getMessage());
+            return false;
+        }
+    }
+
 public function disconnectCustomer($customer_id, $disconnected_by = null)
 {
     try {
