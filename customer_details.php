@@ -98,7 +98,7 @@
 
                     <div class="table-responsive">
                     <table class="table table-bordered">
-                        <thead style="background-color: #008080; color: white;">
+                        <thead style="background-color: #284390; color: white;">
                             <tr>
                                 <th>Package</th>
                                 <th>Month</th>
@@ -159,7 +159,7 @@
                     <?php if ($allBills && count($allBills) > 0): ?>
                         <div class="table-responsive">
                         <table class="table table-striped">
-                            <thead style="background-color: #008080; color: white;">
+                            <thead style="background-color: #284390; color: white;">
                                 <tr>
                                     <th>Package</th>
                                     <th>Month</th>
@@ -234,7 +234,7 @@
                     <h3>Invoice Payment Ledger</h3>
                     <div class="table-responsive">
                     <table class="table table-striped">
-                        <thead style="background-color: #008080; color: white;">
+                        <thead style="background-color: #284390; color: white;">
                             <tr>
                                 <th>Time</th>
                                 <th>Billing Month</th>
