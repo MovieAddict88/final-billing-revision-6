@@ -47,17 +47,17 @@
 				<?php session::destroy('errors');
 				} ?>
 			</div>
-        <div class="table-responsive">
-        <table class="table table-striped" id="grid-basic">
+        <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table class="table table-striped table-bordered" id="grid-basic" style="min-width: 1200px; width: 100%;">
 			<thead class="thead-inverse">
 			  <tr class="info">
-			    <th>ID </th>
-			    <th>Action</th>
-			    <th>Username</th>
-			    <th>Name</th>
-			    <th>Email</th>
-			    <th>Cellphone</th>
-			    <th>Address</th>
+			    <th style="min-width: 50px; background-color: #284390; color: white; white-space: nowrap;">ID </th>
+			    <th style="min-width: 100px; background-color: #284390; color: white; white-space: nowrap;">Action</th>
+			    <th style="min-width: 150px; background-color: #284390; color: white; white-space: nowrap;">Username</th>
+			    <th style="min-width: 150px; background-color: #284390; color: white; white-space: nowrap;">Name</th>
+			    <th style="min-width: 200px; background-color: #284390; color: white; white-space: nowrap;">Email</th>
+			    <th style="min-width: 120px; background-color: #284390; color: white; white-space: nowrap;">Cellphone</th>
+			    <th style="min-width: 200px; background-color: #284390; color: white; white-space: nowrap;">Address</th>
 			  </tr>
 			</thead>
 		  <tbody>
