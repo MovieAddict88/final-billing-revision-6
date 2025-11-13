@@ -105,6 +105,31 @@ class Admins
         return false;
     }
 
+    public function fetchPendingPayments($limit = 100)
+    {
+        $limit = (int) $limit;
+        $request = $this->dbh->prepare("
+        SELECT
+            p.id,
+            p.customer_id,
+            p.package_id,
+            p.r_month as months,
+            p.amount as total,
+            p.g_date,
+            p.p_date,
+            p.status
+        FROM payments p
+        WHERE p.status = 'Pending'
+        ORDER BY p.id DESC
+        LIMIT :limit
+    ");
+        $request->bindValue(':limit', $limit, PDO::PARAM_INT);
+        if ($request->execute()) {
+            return $request->fetchAll();
+        }
+        return false;
+    }
+
     /**
      * Fetch admins paginated with optional search query.
      */
@@ -1458,17 +1483,17 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         $limit = (int) $limit;
         $request = $this->dbh->prepare("
         SELECT
-            id,
-            customer_id,
-            package_id,
-            r_month as months,
-            amount as total,
-            g_date,
-            p_date,
-            status
-        FROM payments
-        WHERE status IN ('Pending')
-        ORDER BY id DESC
+            p.id,
+            p.customer_id,
+            p.package_id,
+            p.r_month as months,
+            p.amount as total,
+            p.g_date,
+            p.p_date,
+            p.status
+        FROM payments p
+        WHERE p.status = 'Pending'
+        ORDER BY p.id DESC
         LIMIT :limit
     ");
         $request->bindValue(':limit', $limit, PDO::PARAM_INT);
@@ -1520,10 +1545,17 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
             $customer = isset($customer) ? $customer : $this->getCustomerInfo($payment->customer_id);
             $history_employer_id = $customer ? $customer->employer_id : null;
         }
+
+        // When a pending payment is approved, extract bill_id from r_month.
+        $bill_id_for_history = $payment->id; // Default for non-pending payments
+        if (preg_match('/\[bill_id:(\d+)\]/', $payment->r_month, $matches)) {
+            $bill_id_for_history = (int)$matches[1];
+        }
+
    $paid_at_sql = $paid_at ? '?' : 'NOW()';
         $request = $this->dbh->prepare("INSERT INTO payment_history (payment_id, customer_id, employer_id, package_id, r_month, amount, paid_amount, balance_after, payment_method, reference_number, paid_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
    $params = [
-            $payment->id,
+            $bill_id_for_history,
             $payment->customer_id,
             $history_employer_id,
             $package_id,
@@ -1556,18 +1588,10 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
 
     public function processPayment($payment_id, $payment_method, $reference_number, $amount_paid = null, $gcash_name = null, $gcash_number = null, $screenshot = null)
     {
-        $payment = $this->getPaymentById($payment_id);
-        if (!$payment) {
+        $original_bill = $this->getPaymentById($payment_id);
+        if (!$original_bill) {
             return false;
         }
-
-        $due_amount = ($payment->balance > 0) ? (float)$payment->balance : (float)$payment->amount;
-        $paid_now = max(0.0, (float)$amount_paid);
-        // Clamp to not go below zero
-        if ($paid_now > $due_amount) {
-            $paid_now = $due_amount;
-        }
-        $new_balance = $due_amount - $paid_now;
 
         $screenshot_path = null;
         if ($screenshot && $screenshot['error'] == UPLOAD_ERR_OK) {
@@ -1577,21 +1601,41 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
             }
             $filename = uniqid() . '-' . preg_replace('/[^A-Za-z0-9.\-\_]/', '', basename($screenshot['name']));
             $screenshot_path = $upload_dir . $filename;
-            move_uploaded_file($screenshot['tmp_name'], $screenshot_path);
+            if (!move_uploaded_file($screenshot['tmp_name'], $screenshot_path)) {
+                // Handle file upload error
+                return false;
+            }
         }
 
-        // Preserve submitted amount for admin display in gcash_name when e-wallets are used
-        $submitted_amount = (is_numeric($gcash_name) ? (float)$gcash_name : $paid_now);
-        $request = $this->dbh->prepare("UPDATE payments SET status = 'Pending', balance = ?, payment_method = ?, reference_number = ?, gcash_name = ?, gcash_number = ?, screenshot = ? WHERE id = ?");
-        return $request->execute([$new_balance, $payment_method, $reference_number, $submitted_amount, $gcash_number, $screenshot_path, $payment_id]);
+        $r_month_for_pending = "[bill_id:{$original_bill->id}] " . $original_bill->r_month;
+        $customer = $this->getCustomerInfo($original_bill->customer_id);
+        $employer_id = $customer ? $customer->employer_id : $original_bill->employer_id;
+
+        $request = $this->dbh->prepare(
+            "INSERT INTO payments (customer_id, employer_id, package_id, r_month, amount, balance, status, payment_method, reference_number, gcash_name, gcash_number, screenshot, p_date) VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, NOW())"
+        );
+
+        return $request->execute([
+            $original_bill->customer_id,
+            $employer_id,
+            $original_bill->package_id,
+            $r_month_for_pending,
+            $amount_paid,
+            0, // Balance for this pending record is 0
+            $payment_method,
+            $reference_number,
+            $amount_paid, // gcash_name stores the submitted amount
+            $gcash_number,
+            $screenshot_path
+        ]);
     }
 
     public function processManualPayment($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_method, $screenshot = null, $payment_date = null, $payment_time = null)
     {
-   $paid_at = null;
-   if ($payment_date && $payment_time) {
-    $paid_at = date('Y-m-d H:i:s', strtotime("$payment_date $payment_time"));
-   }
+        $paid_at = null;
+        if ($payment_date && $payment_time) {
+            $paid_at = date('Y-m-d H:i:s', strtotime("$payment_date $payment_time"));
+        }
 
         $screenshot_path = null;
         if ($screenshot && $screenshot['error'] == UPLOAD_ERR_OK) {
@@ -1619,35 +1663,29 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                     continue;
                 }
 
-                $due_amount = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
-
-                if ($remaining_amount >= $due_amount) {
-                    $new_balance = 0;
-                    $payment_for_this_bill = $due_amount;
-                } else {
-                    $new_balance = $due_amount - $remaining_amount;
-                    $payment_for_this_bill = $remaining_amount;
-                }
+                $r_month_for_pending = "[bill_id:{$bill->id}] " . $bill->r_month;
 
                 $request = $this->dbh->prepare(
-                    "UPDATE payments SET status = 'Pending', balance = ?, payment_method = ?, employer_id = ?, reference_number = ?, screenshot = ?, gcash_name = ?, gcash_number = ?, payment_timestamp = ? WHERE id = ?"
+                    "INSERT INTO payments (customer_id, employer_id, package_id, r_month, amount, balance, status, payment_method, reference_number, gcash_name, gcash_number, screenshot, p_date) VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, ?, ?, ?)"
                 );
                 $request->execute([
-                    $new_balance,
-                    $payment_method,
+                    $customer_id,
                     $employer_id,
+                    $bill->package_id,
+                    $r_month_for_pending,
+                    $remaining_amount,
+                    0,
+                    $payment_method,
                     $reference_number,
+                    $remaining_amount,
+                    null,
                     $screenshot_path,
-                    $payment_for_this_bill,
-                    $amount,
-                    $paid_at,
-                    $bill_id
+                    $paid_at
                 ]);
 
-
-
-                $remaining_amount -= $payment_for_this_bill;
+                $remaining_amount = 0;
             }
+
             if ($remaining_amount > 0) {
                 $request = $this->dbh->prepare("INSERT INTO advance_payments (customer_id, amount) VALUES (?, ?)");
                 $request->execute([$customer_id, $remaining_amount]);
@@ -1747,42 +1785,56 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
 
     public function approvePayment($payment_id, $paid_at = null)
     {
-        $payment = $this->getPaymentById($payment_id);
-        if (!$payment) {
+        $pending_payment = $this->getPaymentById($payment_id);
+        if (!$pending_payment || $pending_payment->status !== 'Pending') {
             return false;
         }
-        if ($payment->screenshot && file_exists($payment->screenshot)) {
-            unlink($payment->screenshot);
+
+        if ($pending_payment->screenshot && file_exists($pending_payment->screenshot)) {
+            unlink($pending_payment->screenshot);
         }
-        // Determine the submitted amount for this approval
-        $submitted_amount = 0.0;
-        if (isset($payment->gcash_name) && is_numeric($payment->gcash_name)) {
-            $submitted_amount = (float)$payment->gcash_name;
+
+        // This is a partial payment, find the original bill
+        if (preg_match('/\[bill_id:(\d+)\]/', $pending_payment->r_month, $matches)) {
+            $original_bill_id = (int)$matches[1];
+            $original_bill = $this->getPaymentById($original_bill_id);
+            if (!$original_bill) {
+                return false; // Original bill not found
+            }
+
+            $paid_amount = (float)$pending_payment->amount;
+            $new_balance = (float)$original_bill->balance - $paid_amount;
+            if ($new_balance < 0) {
+                $new_balance = 0;
+            }
+
+            // Update the original bill's balance
+            $update_bill_request = $this->dbh->prepare("UPDATE payments SET balance = ? WHERE id = ?");
+            $update_bill_request->execute([$new_balance, $original_bill_id]);
+
+            // Mark the partial payment as 'Paid'
+            $new_status = 'Paid';
         } else {
-            // Fallback: compute remaining unrecorded portion by subtracting any previously recorded amounts
-            $sumRequest = $this->dbh->prepare("SELECT COALESCE(SUM(paid_amount),0) AS total_recorded FROM payment_history WHERE payment_id = ?");
-            $sumRequest->execute([$payment_id]);
-            $row = $sumRequest->fetch();
-            $total_recorded = $row ? (float)$row->total_recorded : 0.0;
-            $already_paid_total = (float)$payment->amount - (float)$payment->balance;
-            $submitted_amount = max(0.0, $already_paid_total - $total_recorded);
+            // This is a regular payment, not a partial one
+            $new_status = ($pending_payment->balance <= 0) ? 'Paid' : 'Unpaid';
         }
 
-        // Insert a history entry for this payment approval
-        if ($submitted_amount > 0) {
-            $this->insertPaymentHistoryEntry($payment, $submitted_amount, $paid_at);
+        // Update the payment's status (either the partial or the regular one)
+        $p_date_sql = $paid_at ? '?' : 'NOW()';
+        $request = $this->dbh->prepare("UPDATE payments SET status = ?, p_date = $p_date_sql, screenshot = NULL, gcash_name = NULL, gcash_number = NULL WHERE id = ?");
+        $params = [$new_status];
+        if ($paid_at) {
+            $params[] = $paid_at;
+        }
+        $params[] = $payment_id;
+
+        if ($request->execute($params)) {
+            // Insert history entry for the approved amount
+            $this->insertPaymentHistoryEntry($pending_payment, (float)$pending_payment->amount, $paid_at);
+            return true;
         }
 
-        $new_status = ($payment->balance <= 0) ? 'Paid' : 'Unpaid';
-   $p_date_sql = $paid_at ? '?' : 'NOW()';
-        $request = $this->dbh->prepare("UPDATE payments SET status = ?, p_date = $p_date_sql, screenshot = NULL, gcash_name = NULL, gcash_number = NULL, payment_timestamp = ? WHERE id = ?");
-   $params = [$new_status];
-   if ($paid_at) {
-    $params[] = $paid_at;
-   }
-   $params[] = $payment->payment_timestamp;
-   $params[] = $payment_id;
-        return $request->execute($params);
+        return false;
     }
 
     public function rejectPayment($payment_id)
@@ -1796,37 +1848,10 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
             unlink($payment->screenshot);
         }
 
-        // Restore balance to the state BEFORE the pending submission.
-        // The submitted amount for this pending entry is stored temporarily
-        // in gcash_name (for both Manual and e-wallet payments). If not
-        // available, derive it from the ledger to avoid resetting prior
-        // partial payments.
-        $submitted_amount = 0.0;
-        if (isset($payment->gcash_name) && is_numeric($payment->gcash_name)) {
-            $submitted_amount = (float)$payment->gcash_name;
-        } else {
-            // Fallback: compute amount included in this pending update that
-            // is not yet recorded in payment_history.
-            $sumRequest = $this->dbh->prepare("SELECT COALESCE(SUM(paid_amount),0) AS total_recorded FROM payment_history WHERE payment_id = ?");
-            $sumRequest->execute([$payment_id]);
-            $row = $sumRequest->fetch();
-            $total_recorded = $row ? (float)$row->total_recorded : 0.0;
-            $already_paid_total = (float)$payment->amount - (float)$payment->balance; // includes the pending part
-            $submitted_amount = max(0.0, $already_paid_total - $total_recorded);
-        }
-
-        // Current balance is (previous_due - submitted_amount). Add back the
-        // submitted amount to restore the previous due, and clamp within [0, amount].
-        $restore_balance = (float)$payment->balance + $submitted_amount;
-        if ($restore_balance > (float)$payment->amount) {
-            $restore_balance = (float)$payment->amount;
-        }
-        if ($restore_balance < 0) {
-            $restore_balance = 0.0;
-        }
-
-        $request = $this->dbh->prepare("UPDATE payments SET status = 'Rejected', balance = ?, screenshot = NULL, gcash_name = NULL, gcash_number = NULL WHERE id = ?");
-        return $request->execute([$restore_balance, $payment_id]);
+        // For unlimited pending payments, we just mark the specific pending record as 'Rejected'.
+        // The original bill's balance is not affected by this rejection.
+        $request = $this->dbh->prepare("UPDATE payments SET status = 'Rejected', screenshot = NULL, gcash_name = NULL, gcash_number = NULL WHERE id = ?");
+        return $request->execute([$payment_id]);
     }
     
     public function getAdvancePaymentBalance($customer_id)

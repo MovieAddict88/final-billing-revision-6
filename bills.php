@@ -36,6 +36,54 @@
 		<br><br>
 		
 		</div>
+		<div class="col-md-12 col-sm-12">
+    <h4>Pending Payments</h4>
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead class="thead-inverse">
+                <tr class="info">
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Package</th>
+                    <th>Months</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $pending_payments = $admins->fetchPendingPayments();
+                if (isset($pending_payments) && sizeof($pending_payments) > 0) {
+                    foreach ($pending_payments as $payment) {
+                        $customer = $admins->getCustomerInfo($payment->customer_id);
+                        $package = $admins->getPackageInfo($payment->package_id);
+                ?>
+                        <tr>
+                            <td><?= $payment->id ?></td>
+                            <td><?= $customer->full_name ?></td>
+                            <td><?= $package->name ?></td>
+                            <td><?= $payment->months ?></td>
+                            <td>₱<?= number_format($payment->total, 2) ?></td>
+                            <td><span class="label label-warning">Pending</span></td>
+                            <td>
+                                <a href="approve.php?id=<?= $payment->id ?>&action=approve" class="btn btn-success btn-sm">Approve</a>
+                                <a href="approve.php?id=<?= $payment->id ?>&action=reject" class="btn btn-danger btn-sm">Reject</a>
+                                <a href="view_payment.php?id=<?= $payment->id ?>" class="btn btn-info btn-sm">View</a>
+                            </td>
+                        </tr>
+                <?php
+                    }
+                } else {
+                    echo "<tr><td colspan='7' class='text-center'>No pending payments found.</td></tr>";
+                }
+                ?>
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    <h4>All Bills</h4>
+</div>
 		<div class="col-md-12 col-sm-12" id="bill_table">
 			<?php
 			  $billing = $admins->fetchBilling();

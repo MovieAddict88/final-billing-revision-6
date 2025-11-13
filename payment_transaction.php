@@ -16,31 +16,32 @@ if (!isset($_GET['id'])) {
     exit();
 }
 
-$payment_id = $_GET['id'];
-$payment = $admins->getPaymentById($payment_id); // Function exists in admin-class.php
+$bill_id = $_GET['id'];
+$payment = $admins->getPaymentById($bill_id);
 $due_amount = ($payment && $payment->balance > 0) ? (float)$payment->balance : (float)$payment->amount;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-$amount = $_POST['amount'];
-$payment_method = $_POST['payment_method'];
-$reference_number = $_POST['reference_number'];
-// Store the submitted amount in gcash_name so admin can see this submission amount
-// Retain wallet account number in gcash_number
-$gcash_name = (is_numeric($amount) ? (float)$amount : null);
-// Combine wallet account name and number into JSON for storage (backward compatible)
-$wallet_account_name = isset($_POST['wallet_account_name']) ? trim($_POST['wallet_account_name']) : null;
-$wallet_account_number = isset($_POST['wallet_account_number']) ? trim($_POST['wallet_account_number']) : (isset($_POST['gcash_number']) ? trim($_POST['gcash_number']) : null);
-if (!empty($wallet_account_name) || !empty($wallet_account_number)) {
-    $gcash_number = json_encode([
-        'name' => $wallet_account_name ?: null,
-        'number' => $wallet_account_number ?: null,
-    ]);
-} else {
-    $gcash_number = null;
-}
-$screenshot = isset($_FILES['screenshot']) ? $_FILES['screenshot'] : null;
+    $amount = $_POST['amount'];
+    $payment_method = $_POST['payment_method'];
+    $reference_number = $_POST['reference_number'];
 
-    if ($admins->processPayment($payment_id, $payment_method, $reference_number, $amount, $gcash_name, $gcash_number, $screenshot)) {
+    $gcash_name = (is_numeric($amount) ? (float)$amount : null);
+
+    $wallet_account_name = isset($_POST['wallet_account_name']) ? trim($_POST['wallet_account_name']) : null;
+    $wallet_account_number = isset($_POST['wallet_account_number']) ? trim($_POST['wallet_account_number']) : (isset($_POST['gcash_number']) ? trim($_POST['gcash_number']) : null);
+
+    if (!empty($wallet_account_name) || !empty($wallet_account_number)) {
+        $gcash_number = json_encode([
+            'name' => $wallet_account_name ?: null,
+            'number' => $wallet_account_number ?: null,
+        ]);
+    } else {
+        $gcash_number = null;
+    }
+
+    $screenshot = isset($_FILES['screenshot']) ? $_FILES['screenshot'] : null;
+
+    if ($admins->processPayment($bill_id, $payment_method, $reference_number, $amount, $gcash_name, $gcash_number, $screenshot)) {
         header('Location: customer_dashboard.php?payment=success');
         exit();
     } else {
@@ -65,9 +66,9 @@ $screenshot = isset($_FILES['screenshot']) ? $_FILES['screenshot'] : null;
                     <p><strong>Remaining Due:</strong> <?php echo number_format((float)$due_amount, 2); ?></p>
                     <form action="" method="POST" enctype="multipart/form-data">
                         <div class="form-group">
-                            <label for="amount">Amount to Pay (Initial allowed)</label>
-                            <input type="number" name="amount" id="amount" class="form-control" step="0.01" min="0" max="<?php echo htmlspecialchars($due_amount); ?>" value="<?php echo htmlspecialchars(number_format((float)$due_amount, 2, '.', '')); ?>" required>
-                            <small class="form-text text-muted">You can pay any amount up to the remaining balance.</small>
+                            <label for="amount">Amount to Pay</label>
+                            <input type="number" name="amount" id="amount" class="form-control" step="0.01" min="0" required>
+                            <small class="form-text text-muted">Enter the amount you wish to pay.</small>
                         </div>
                         <div class="form-group">
                             <label for="payment_method">Payment Method</label>
@@ -119,18 +120,6 @@ $screenshot = isset($_FILES['screenshot']) ? $_FILES['screenshot'] : null;
 
     // Trigger the change event on page load to set the initial state
     document.getElementById('payment_method').dispatchEvent(new Event('change'));
-
-    // Clamp amount input to remaining due
-    (function(){
-        var amountEl = document.getElementById('amount');
-        if (!amountEl) return;
-        var max = parseFloat(amountEl.getAttribute('max')) || 0;
-        amountEl.addEventListener('input', function(){
-            var val = parseFloat(this.value) || 0;
-            if (val > max) this.value = max.toFixed(2);
-            if (val < 0) this.value = '0.00';
-        });
-    })();
 </script>
 
 <?php
