@@ -381,13 +381,7 @@ if ($user_role == 'employer') {
                                                     <a href="discount.php?customer=<?php echo $customer->id; ?>" class="btn btn-info btn-sm action-btn">Discount</a>
                                                 <?php endif; ?>
 												<button type="button" class="btn btn-primary btn-sm action-btn" onclick='openRemarkModal(<?php echo $customer->id; ?>, <?php echo json_encode($customer->remarks); ?>)'>Remark</button>
-												<?php
-													$dueDate = new DateTime($customer->due_date);
-													$today = new DateTime();
-													if ($dueDate < $today) {
-														echo '<a href="disconnect_customer.php?customer_id=' . $customer->id . '" class="btn btn-danger btn-sm action-btn">DISCONNECT</a>';
-													}
-												?>
+												<a href="disconnect_customer.php?customer_id=<?php echo $customer->id; ?>" class="btn btn-danger btn-sm action-btn">DISCONNECT</a>
                                             </div>
 											<div class="fade modal" id="edit-<?php echo $customer->id; ?>">
 												<div class="modal-dialog" role="document">
