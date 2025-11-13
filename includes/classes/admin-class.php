@@ -1629,19 +1629,22 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                     $payment_for_this_bill = $remaining_amount;
                 }
 
+                // Create a new pending payment record instead of updating the bill
+                $new_reference_number = "ref-bill-id:" . $bill_id . ":" . $reference_number;
                 $request = $this->dbh->prepare(
-                    "UPDATE payments SET status = 'Pending', balance = ?, payment_method = ?, employer_id = ?, reference_number = ?, screenshot = ?, gcash_name = ?, gcash_number = ?, payment_timestamp = ? WHERE id = ?"
+                    "INSERT INTO payments (customer_id, employer_id, package_id, r_month, amount, balance, status, payment_method, reference_number, screenshot, gcash_name, gcash_number, payment_timestamp) VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, ?, ?, NULL, NULL, ?)"
                 );
                 $request->execute([
-                    $new_balance,
-                    $payment_method,
+                    $bill->customer_id,
                     $employer_id,
-                    $reference_number,
-                    $screenshot_path,
+                    $bill->package_id,
+                    $bill->r_month,
                     $payment_for_this_bill,
-                    $amount,
-                    $paid_at,
-                    $bill_id
+                    $due_amount, // The original balance of the bill being paid
+                    $payment_method,
+                    $new_reference_number,
+                    $screenshot_path,
+                    $paid_at
                 ]);
 
 
@@ -1751,6 +1754,65 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         if (!$payment) {
             return false;
         }
+
+        // Handle new manual payment approval
+        if ($payment->status === 'Pending' && strpos($payment->reference_number, 'ref-bill-id:') === 0) {
+            $parts = explode(':', $payment->reference_number);
+            $original_bill_id = (int)$parts[1];
+            $user_reference = implode(':', array_slice($parts, 2));
+
+            $original_bill = $this->getPaymentById($original_bill_id);
+
+            if ($original_bill) {
+                $paid_amount = (float)$payment->amount;
+                $due_amount = ($original_bill->balance > 0) ? (float)$original_bill->balance : (float)$original_bill->amount;
+                $new_balance = max(0, $due_amount - $paid_amount);
+                $new_status = ($new_balance <= 0) ? 'Paid' : 'Unpaid';
+
+                $this->dbh->beginTransaction();
+                try {
+                    // Update the original bill
+                    $p_date_sql = $paid_at ? '?' : 'NOW()';
+                    $update_request = $this->dbh->prepare("UPDATE payments SET balance = ?, status = ?, p_date = $p_date_sql WHERE id = ?");
+                    $update_params = [$new_balance, $new_status];
+                    if ($paid_at) $update_params[] = $paid_at;
+                    $update_params[] = $original_bill_id;
+                    $update_request->execute($update_params);
+
+                    // Insert into payment history, associating with the original bill
+                    $history_payment_obj = (object)[
+                        'id' => $original_bill_id,
+                        'customer_id' => $payment->customer_id,
+                        'employer_id' => $payment->employer_id,
+                        'package_id' => $payment->package_id,
+                        'r_month' => $payment->r_month,
+                        'amount' => $original_bill->amount,
+                        'balance' => $new_balance,
+                        'payment_method' => $payment->payment_method,
+                        'reference_number' => $user_reference,
+                        'payment_timestamp' => $payment->payment_timestamp,
+                    ];
+                    $this->insertPaymentHistoryEntry($history_payment_obj, $paid_amount, $paid_at);
+
+                    // Delete the temporary pending payment record
+                    $delete_request = $this->dbh->prepare("DELETE FROM payments WHERE id = ?");
+                    $delete_request->execute([$payment_id]);
+
+                    if ($payment->screenshot && file_exists($payment->screenshot)) {
+                        unlink($payment->screenshot);
+                    }
+
+                    $this->dbh->commit();
+                    return true;
+                } catch (Exception $e) {
+                    $this->dbh->rollBack();
+                    error_log($e->getMessage());
+                    return false;
+                }
+            }
+        }
+
+        // Fallback to original logic for other payment types
         if ($payment->screenshot && file_exists($payment->screenshot)) {
             unlink($payment->screenshot);
         }
@@ -1790,6 +1852,15 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         $payment = $this->getPaymentById($payment_id);
         if (!$payment) {
             return false;
+        }
+
+        // Handle new manual payment rejection
+        if ($payment->status === 'Pending' && strpos($payment->reference_number, 'ref-bill-id:') === 0) {
+            if ($payment->screenshot && file_exists($payment->screenshot)) {
+                unlink($payment->screenshot);
+            }
+            $delete_request = $this->dbh->prepare("DELETE FROM payments WHERE id = ?");
+            return $delete_request->execute([$payment_id]);
         }
 
         if ($payment->screenshot && file_exists($payment->screenshot)) {
