@@ -124,7 +124,12 @@
 				<tr>
 					<td scope="row"><?=$customer->id ?></td>
 					<td>
-						<button type="button" id="edit" class="btn btn-success btn-sm btn-action" data-toggle="modal" data-target="#edit-<?=$customer->id?>">EDIT</button>
+						<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; max-width: 200px;">
+							<button type="button" id="edit" class="btn btn-success btn-sm btn-action" data-toggle="modal" data-target="#edit-<?=$customer->id?>">EDIT</button>
+							<a href="customer_details.php?id=<?=$customer->id?>" class="btn btn-info btn-sm btn-action">VIEW</a>
+							<button type="submit" id="delete" onclick="delData(<?=$customer->id ?>)" class="btn btn-warning btn-sm btn-action">DELETE</button>
+							<button type="button" class="btn btn-primary btn-sm btn-action remark-btn" data-customer-id="<?=$customer->id?>" data-remarks="<?=htmlspecialchars(isset($customer->remarks) ? $customer->remarks : '')?>">REMARK</button>
+						</div>
 						<div class="fade modal" id="edit-<?=$customer->id?>">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
@@ -222,9 +227,7 @@
 								</div>
 							</div>
 						</div>
-						<a href="customer_details.php?id=<?=$customer->id?>" class="btn btn-info btn-sm btn-action">VIEW</a>
-						<button type="submit" id="delete" onclick="delData(<?=$customer->id ?>)" class="btn btn-warning btn-sm btn-action">DELETE</button>
-						<button type="button" class="btn btn-primary btn-sm btn-action remark-btn" data-customer-id="<?=$customer->id?>" data-remarks="<?=htmlspecialchars(isset($customer->remarks) ? $customer->remarks : '')?>">REMARK</button>
+						<div style="margin-top: 5px;">
 						<?php
 						$dueDate = $customer->due_date;
 						$endDate = $customer->end_date;
@@ -261,6 +264,7 @@
 						}
 						?>
 						<a href="disconnect_customer.php?customer_id=<?=$customer->id?>" class="btn btn-danger btn-sm btn-action">DISCONNECT</a>
+						</div>
 					</td>
 					<td class="search"><?=$customer->full_name?></td>
 					<td class="search"><?=$customer->employer_name ? $customer->employer_name : 'N/A'?></td>
