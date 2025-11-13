@@ -1467,7 +1467,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
             p_date,
             status
         FROM payments
-        WHERE status IN ('Unpaid', 'Pending')
+        WHERE status IN ('Pending')
         ORDER BY id DESC
         LIMIT :limit
     ");
