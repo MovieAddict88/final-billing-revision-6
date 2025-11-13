@@ -97,9 +97,19 @@
 					<span class="label <?=$status_class?>"><?=$status?></span>
 				</td>
 				<td>
-					<?php if ($bill->status == 'Pending'): ?>
-						<button type="button" onClick="view_payment(<?=$bill->id?>)" class="btn btn-warning">View</button>
-					<?php else: ?>
+					<?php
+					$pending_payments = $admins->getPendingPaymentsForBill($bill->id);
+					if (!empty($pending_payments)):
+						foreach ($pending_payments as $pending):
+					?>
+							<div style="margin-bottom: 5px;">
+								<span>Pending Payment: ₱<?=number_format($pending->amount, 2)?></span>
+								<button type="button" onClick="view_payment(<?=$pending->id?>)" class="btn btn-warning btn-xs">View</button>
+							</div>
+					<?php
+						endforeach;
+					else:
+					?>
 						<button type="button" onClick="pay(<?=$client_id?>)" class="btn btn-info">Pay</button>
 						<button onClick="bill(<?=$client_id?>)" type="button" class="btn btn-info">Bill</button>
 					<?php endif; ?>
