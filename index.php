@@ -23,7 +23,7 @@ if ($user_role == 'employer') {
     
     $products = $admins->fetchProductsByEmployer($employer_id);
 ?>
-<h3>Employer Dashboard</h3>
+<h3 style="margin-top: 20px;">ACCOUNT MANAGER</h3>
 <style>
     .table-custom thead {
         background-color: #008080;
