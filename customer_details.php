@@ -100,14 +100,14 @@
                     <table class="table table-bordered">
                         <thead style="background-color: #284390; color: white;">
                             <tr>
-                                <th style="white-space: nowrap;">Package</th>
-                                <th style="white-space: nowrap;">Month</th>
-                                <th style="white-space: nowrap;">Amount</th>
-                                <th style="white-space: nowrap;">Paid</th>
-                                <th style="white-space: nowrap;">Balance</th>
-                                <th style="white-space: nowrap;">Status</th>
-                                <th style="white-space: nowrap;">Total</th>
-                                <th style="white-space: nowrap;">Action</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Package</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Month</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Amount</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Paid</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Balance</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Status</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Total</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
