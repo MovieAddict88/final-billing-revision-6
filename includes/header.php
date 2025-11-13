@@ -81,13 +81,13 @@
         }
     </style>
     
-    <title>CS-BILLING | <?php echo ucfirst($_SESSION['user_role'] ?? 'Admin'); ?></title>
+    <title>CS-BILLING | <?php echo ($_SESSION['user_role'] == 'employer') ? 'Account Manager' : ucfirst($_SESSION['user_role'] ?? 'Admin'); ?></title>
 </head>
 <body>
     <header class="cd-main-header" style="background: #284390;">
         <a href="#0" class="cd-logo" style="color: #f8cb18; font-weight: 900; font-size: 18px; text-decoration: none; display: flex; align-items: center; gap: 10px;">
             <img src="component/orig_cs.png" alt="avatar" style="border: 2px solid #f8cb18; object-fit: cover; border-radius: 50%; width: 40px; height: 40px;" class="header-logo">
-            CS-BILLING | <?php echo ucfirst($_SESSION['user_role'] ?? 'Admin'); ?>
+            CS-BILLING | <?php echo ($_SESSION['user_role'] == 'employer') ? 'Account Manager' : ucfirst($_SESSION['user_role'] ?? 'Admin'); ?>
         </a>
         
         <!-- Global search suggestions container -->
