@@ -370,6 +370,7 @@ if ($user_role == 'employer') {
                                             <div class="action-buttons">
                                                 <a href="pay.php?customer=<?php echo $customer->id; ?>&action=bill" class="btn btn-primary btn-sm action-btn">Invoice</a>
                                                 <a href="pay.php?customer=<?php echo $customer->id; ?>" class="btn btn-info btn-sm action-btn">Bill</a>
+												<button type="button" class="btn btn-success btn-sm action-btn" data-toggle="modal" data-target="#edit-<?php echo $customer->id; ?>">Edit</button>
                                                 <?php if ($customer->total_balance > 0): ?>
                                                     <a href="manual_payment.php?customer=<?php echo $customer->id; ?>" class="btn btn-warning btn-sm action-btn">
                                                         <?php echo ($customer->total_paid > 0) ? 'Pay Balance' : 'Pay'; ?>
@@ -388,6 +389,90 @@ if ($user_role == 'employer') {
 													}
 												?>
                                             </div>
+											<div class="fade modal" id="edit-<?php echo $customer->id; ?>">
+												<div class="modal-dialog" role="document">
+													<div class="modal-content">
+														<div class="modal-header">
+															<button type="button" class="close" data-dismiss="modal">×</button>
+															<h4>Edit Details</h4>
+														</div>
+														<form method="POST">
+															<div class="modal-body">
+																<input type="hidden" id="<?php echo $customer->id; ?>" value="<?php echo $customer->id; ?>">
+
+																<div class="form-group has-success">
+																	<label for="name">Full Name</label>
+																	<input type="text" class="form-control" id="fnm-<?php echo $customer->id; ?>"  value="<?php echo $customer->full_name; ?>" required>
+																</div>
+																<div class="form-group">
+																	<label for="nid">NID</label>
+																	<input type="text" class="form-control" id="nid-<?php echo $customer->id; ?>"  value="<?php echo $customer->nid; ?>" required>
+																</div>
+																<div class="form-group">
+																	<label for="account_number">Account Number</label>
+																	<input type="text" class="form-control" id="acn-<?php echo $customer->id; ?>"  value="<?php echo $customer->account_number; ?>" required>
+																</div>
+																<div class="form-group">
+																	<label for="address">Address</label>
+																	<input type="text" class="form-control" id="ad-<?php echo $customer->id; ?>"  value="<?php echo $customer->address; ?>" required>
+																</div>
+																<div class="form-group">
+																<label for="package">Select Package</label>
+																	<select class="form-control form-control-sm" name="package" id="pk-<?php echo $customer->id; ?>">
+																	<?php
+																		$packageInfo = $admins->getPackageInfo($customer->package_id);
+																		$package_name = $packageInfo ? $packageInfo->name : 'N/A';
+																	?>
+																	<option value='<?php echo $customer->package_id; ?>'><?php echo $package_name; ?></option>
+																	<?php
+																		$packages = $admins->getPackages();
+																		if (isset($packages) && sizeof($packages) > 0){
+																			foreach ($packages as $package) { ?>
+																			<option value='<?php echo $package->id; ?>'><?php echo $package->name; ?></option>
+																	<?php }} ?>
+																	</select>
+																</div>
+																<div class="form-group">
+																	<label for="ip">IP Address</label>
+																	<input type="text" class="form-control" id="ip-<?php echo $customer->id; ?>"  value="<?php echo $customer->ip_address; ?>" required>
+																</div>
+																<div class="form-group">
+																	<label for="contact">Contact</label>
+																	<input type="text" class="form-control" id="con-<?php echo $customer->id; ?>"   value="<?php echo $customer->contact; ?>" required>
+																</div>
+																<div class="form-group">
+																	<label for="start_date">Start Date</label>
+																	<input type="date" class="form-control" id="start_date-<?php echo $customer->id; ?>"   value="<?php echo $customer->start_date; ?>" required onchange="updateEndDate(<?php echo $customer->id; ?>)">
+																</div>
+																<div class="form-group">
+																	<label for="end_date">End Date</label>
+																	<input type="date" class="form-control" id="end_date-<?php echo $customer->id; ?>"   value="<?php echo $customer->end_date; ?>">
+																</div>
+																<div class="form-group">
+																	<label for="due_date">Due Date</label>
+																	<input type="date" class="form-control" id="due_date-<?php echo $customer->id; ?>"   value="<?php echo $customer->due_date; ?>" required>
+																</div>
+																<div class="form-group">
+																	<label for="conlocation">Connection Location</label>
+																	<input type="text" class="form-control" id="conn_loc-<?php echo $customer->id; ?>"   value="<?php echo $customer->conn_location; ?>" required>
+																</div>
+																<div class="form-group">
+																	<label for="type">Connection Type</label>
+																	<input type="text" class="form-control" id="ct-<?php echo $customer->id; ?>"   value="<?php echo $customer->conn_type; ?>" required>
+																</div>
+																<div class="form-group">
+																	<label for="email">Email</label>
+																	<input type="text" class="form-control" id="em-<?php echo $customer->id; ?>"   value="<?php echo $customer->email; ?>" required>
+																</div>
+															</div>
+															<div class="modal-footer">
+																<button type="button"  onclick="updateData(<?php echo $customer->id; ?>)" class="btn btn-primary">Update</button>
+																<a href="#" class="btn btn-warning" data-dismiss="modal">Cancel</a>
+															</div>
+														</form>
+													</div>
+												</div>
+											</div>
                                         </td>
 										<td><?php echo htmlspecialchars($customer->remarks ?? ''); ?></td>
                                     </tr>
@@ -636,6 +721,45 @@ include 'includes/footer.php';
 ?>
 
 <script type="text/javascript">
+<?php if ($user_role == 'employer'): ?>
+function updateEndDate(id) {
+    var startDate = $('#start_date-' + id).val();
+    if (startDate) {
+        var date = new Date(startDate);
+        date.setMonth(date.getMonth() + 1);
+        var year = date.getFullYear();
+        var month = ('0' + (date.getMonth() + 1)).slice(-2);
+        var day = ('0' + date.getDate()).slice(-2);
+        $('#end_date-' + id).val(year + '-' + month + '-' + day);
+    }
+}
+
+function updateData(str){
+    var id = str;
+    var full_name = $('#fnm-'+str).val();
+    var nid = $('#nid-'+str).val();
+    var account_number = $('#acn-'+str).val();
+    var address = $('#ad-'+str).val();
+    var package = $('#pk-'+str).val();
+    var conn_location = $('#conn_loc-'+str).val();
+    var email = $('#em-'+str).val();
+    var ip_address = $('#ip-'+str).val();
+    var conn_type = $('#ct-'+str).val();
+    var contact = $('#con-'+str).val();
+    var start_date = $('#start_date-'+str).val();
+    var due_date = $('#due_date-'+str).val();
+    var end_date = $('#end_date-'+str).val();
+
+    $.ajax({
+        method:"POST",
+        url: "customers_approve.php?p=edit",
+        data: "full_name="+full_name+"&nid="+nid+"&account_number="+account_number+"&address="+address+"&conn_location="+conn_location+"&email="+email+"&package="+package+"&ip_address="+ip_address+"&conn_type="+conn_type+"&contact="+contact+"&employer=<?php echo $employer_id; ?>&id="+id+"&start_date="+start_date+"&due_date="+due_date+"&end_date="+end_date,
+        success: function (data){
+            location.reload();
+        }
+    });
+}
+<?php endif; ?>
     $(document).ready(function() {
         <?php if ($user_role == 'employer'): ?>
         $.ajax({
