@@ -60,7 +60,7 @@ $is_admin = ($user_role == 'admin');
                 <table class="table table-striped table-bordered" id="grid-basic" style="min-width: 1200px; width: 100%;">
                     <thead class="thead-inverse">
                         <tr class="info">
-                            <th style="min-width: 50px; background-color: #284390; color: white;">Original ID</th>
+                            <th style="min-width: 50px; white-space: nowrap; background-color: #284390; color: white;">Original ID</th>
                             <th style="min-width: 150px; background-color: #284390; color: white;">Name</th>
                             <th style="min-width: 150px; background-color: #284390; color: white;">Employer</th>
                             <th style="min-width: 120px; background-color: #284390; color: white;">NID</th>
