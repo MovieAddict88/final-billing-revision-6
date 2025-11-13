@@ -98,16 +98,16 @@
 
                     <div class="table-responsive">
                     <table class="table table-bordered">
-                        <thead style="background-color: #008080; color: white;">
+                        <thead style="background-color: #284390; color: white;">
                             <tr>
-                                <th>Package</th>
-                                <th>Month</th>
-                                <th>Amount</th>
-                                <th>Paid</th>
-                                <th>Balance</th>
-                                <th>Status</th>
-                                <th>Total</th>
-                                <th>Action</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Package</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Month</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Amount</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Paid</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Balance</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Status</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Total</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -117,8 +117,8 @@
                                     $balance = $bill->balance;
                                 ?>
                                     <tr>
-                                        <td><?= $packageName ?></td>
-                                        <td><?= $bill->r_month ?></td>
+                                        <td style="white-space: nowrap;"><?= $packageName ?></td>
+                                        <td style="white-space: nowrap;"><?= $bill->r_month ?></td>
                                         <td><?= $bill->amount ?></td>
                                         <td><?= $paidAmount ?></td>
                                         <td><?= $balance ?></td>
@@ -161,12 +161,12 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr style="background-color: #284390; color: white;">
-                                    <th style="background-color: #284390; color: white;">Package</th>
-                                    <th style="background-color: #284390; color: white;">Month</th>
-                                    <th style="background-color: #284390; color: white;">Amount</th>
-                                    <th style="background-color: #284390; color: white;">Paid Amount</th>
-                                    <th style="background-color: #284390; color: white;">Balance</th>
-                                    <th style="background-color: #284390; color: white;">Status</th>
+                                    <th style="background-color: #284390; color: white; white-space: nowrap;">Package</th>
+                                    <th style="background-color: #284390; color: white; white-space: nowrap;">Month</th>
+                                    <th style="background-color: #284390; color: white; white-space: nowrap;">Amount</th>
+                                    <th style="background-color: #284390; color: white; white-space: nowrap;">Paid Amount</th>
+                                    <th style="background-color: #284390; color: white; white-space: nowrap;">Balance</th>
+                                    <th style="background-color: #284390; color: white; white-space: nowrap;">Status</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -179,8 +179,8 @@
                                         $totalAmount += $bill->amount;
                                 ?>
                                     <tr class="<?= $isCompleted ? 'completed-transaction' : '' ?>">
-                                        <td><?= $packageName ?></td>
-                                        <td><?= $bill->r_month ?></td>
+                                        <td style="white-space: nowrap;"><?= $packageName ?></td>
+                                        <td style="white-space: nowrap;"><?= $bill->r_month ?></td>
                                         <td><?= $bill->amount ?></td>
                                         <td><?= $paidAmount ?></td>
                                         <td><?= $balance ?></td>
@@ -251,9 +251,9 @@
                         <?php if (!empty($paymentLedger)): ?>
                             <?php foreach ($paymentLedger as $row): ?>
                                 <tr>
-                                    <td><?= htmlspecialchars(date('Y-m-d h:i:s A', strtotime($row->paid_at))) ?></td>
-                                    <td><?= htmlspecialchars($row->r_month) ?></td>
-                                    <td><?= htmlspecialchars($row->package_name ?: 'N/A') ?></td>
+                                    <td style="white-space: nowrap;"><?= htmlspecialchars(date('Y-m-d h:i:s A', strtotime($row->paid_at))) ?></td>
+                                    <td style="white-space: nowrap;"><?= htmlspecialchars($row->r_month) ?></td>
+                                    <td style="white-space: nowrap;"><?= htmlspecialchars($row->package_name ?: 'N/A') ?></td>
                                     <td><?= number_format((float)$row->amount, 2) ?></td>
                                     <td><?= number_format((float)$row->paid_amount, 2) ?></td>
                                     <td><?= number_format((float)$row->balance_after, 2) ?></td>
