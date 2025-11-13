@@ -122,7 +122,7 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'pay';
     }
 
     .blue-bg {
-        background-color: #007bff !important;
+        background-color: #284390 !important;
         color: white !important;
     }
 
@@ -179,7 +179,7 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'pay';
         .blue-bg {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
-            background-color: #007bff !important;
+            background-color: #284390 !important;
             color: white !important;
         }
 
