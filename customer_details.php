@@ -236,15 +236,15 @@
                     <table class="table table-striped">
                         <thead>
                             <tr style="background-color: #284390; color: white;">
-                                <th style="background-color: #284390; color: white;">Time</th>
-                                <th style="background-color: #284390; color: white;">Billing Month</th>
-                                <th style="background-color: #284390; color: white;">Package</th>
-                                <th style="background-color: #284390; color: white;">Amount</th>
-                                <th style="background-color: #284390; color: white;">Paid Amount</th>
-                                <th style="background-color: #284390; color: white;">Balance</th>
-                                <th style="background-color: #284390; color: white;">Payment Method</th>
-                                <th style="background-color: #284390; color: white;">Reference Number</th>
-                                <th style="background-color: #284390; color: white;">Employer</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Time</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Billing Month</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Package</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Amount</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Paid Amount</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Balance</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Payment Method</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Reference Number</th>
+                                <th style="background-color: #284390; color: white; white-space: nowrap;">Employer</th>
                             </tr>
                         </thead>
                         <tbody>
