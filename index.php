@@ -34,9 +34,49 @@ if ($user_role == 'employer') {
         border-color: #007bff;
     }
 
+    .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px;
+        min-width: 120px;
+    }
+
     .action-btn {
-        width: 80px;
-        margin-bottom: 5px;
+        min-height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        padding: 6px 4px;
+        white-space: nowrap;
+        border: none;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        text-decoration: none;
+        color: inherit;
+    }
+
+    /* Specific button colors */
+    .btn-warning { background-color: #ffc107; border-color: #ffc107; color: #212529; }
+    .btn-info { background-color: #17a2b8; border-color: #17a2b8; color: white; }
+    .btn-success { background-color: #28a745; border-color: #28a745; color: white; }
+    .btn-primary { background-color: #007bff; border-color: #007bff; color: white; }
+    .btn-danger { 
+        background-color: #dc3545; 
+        border-color: #dc3545; 
+        color: white; 
+        grid-column: span 2;
+        width: 100%;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
     .progress-container {
@@ -155,13 +195,6 @@ if ($user_role == 'employer') {
     .status-balance { background: #fff3cd; color: #856404; }
     .status-pending { background: #cce5ff; color: #004085; }
     
-    .action-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        min-width: 120px;
-    }
-    
     .scrollable-table-wrapper {
         overflow-x: auto;
         overflow-y: visible;
@@ -202,14 +235,23 @@ if ($user_role == 'employer') {
         }
         
         .action-btn {
-            width: 70px;
             font-size: 11px;
-            padding: 4px 6px;
+            padding: 5px 3px;
+            min-height: 30px;
         }
         
         .professional-table .login-code {
             font-size: 10px;
             max-width: 120px;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
+            gap: 4px;
+        }
+        
+        .btn-danger {
+            grid-column: span 1;
         }
     }
     
@@ -292,6 +334,64 @@ if ($user_role == 'employer') {
             font-size: 12px;
         }
     }
+
+    /* Chart legend styles for admin dashboard */
+    .chart-legend {
+        width: 100%;
+    }
+    
+    .legend-items-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 8px;
+        width: 100%;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        padding: 6px 0;
+    }
+    
+    .legend-color {
+        width: 20px;
+        height: 10px;
+        margin-right: 8px;
+        border-radius: 3px;
+        flex-shrink: 0;
+    }
+    
+    .legend-text {
+        flex: 1;
+        min-width: 0;
+        word-wrap: break-word;
+    }
+
+    /* === Tablet / Small Laptop (768px - 1024px) === */
+    @media (min-width: 768px) {
+        .legend-items-container {
+            grid-template-columns: repeat(2, 1fr);
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    }
+
+    /* === Standard Laptop / Desktop (1024px and above) === */
+    @media (min-width: 1024px) {
+        .legend-items-container {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    /* === Large Desktop / Smart TV (1400px and above) === */
+    @media (min-width: 1400px) {
+        .legend-items-container {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        .chart-legend {
+            font-size: 1.1em;
+        }
+    }
 </style>
 
 <div class="row employer-stack-laptop">
@@ -367,16 +467,16 @@ if ($user_role == 'employer') {
                                             ?>
                                         </td>
                                         <td>
-                                            <div style="display: grid; grid-template-columns: auto auto; gap: 5px;">
-                                                <a href="manual_payment.php?customer=<?php echo $customer->id; ?>" class="btn btn-warning btn-sm action-btn">Pay</a>
-                                                <a href="manual_payment.php?customer=<?php echo $customer->id; ?>" class="btn btn-warning btn-sm action-btn">Pay Balance</a>
-                                                <button type="button" class="btn btn-success btn-sm action-btn" data-toggle="modal" data-target="#edit-<?php echo $customer->id; ?>">Edit</button>
-                                                <button type="button" class="btn btn-primary btn-sm action-btn" onclick='openRemarkModal(<?php echo $customer->id; ?>, <?php echo json_encode($customer->remarks); ?>)'>Remark</button>
-                                                <a href="pay.php?customer=<?php echo $customer->id; ?>" class="btn btn-info btn-sm action-btn">Bill</a>
-                                                <a href="pay.php?customer=<?php echo $customer->id; ?>&action=bill" class="btn btn-primary btn-sm action-btn">Invoice</a>
-                                                <a href="disconnect_customer.php?customer_id=<?php echo $customer->id; ?>" class="btn btn-danger btn-sm action-btn">DISCONNECT</a>
-                                                <a href="discount.php?customer=<?php echo $customer->id; ?>" class="btn btn-info btn-sm action-btn">Discount</a>
-                                            </div>
+    <div class="action-buttons">
+        <a href="manual_payment.php?customer=<?php echo $customer->id; ?>" class="btn btn-warning btn-sm action-btn">Pay</a>
+        <a href="discount.php?customer=<?php echo $customer->id; ?>" class="btn btn-info btn-sm action-btn">Discount</a>
+        <button type="button" class="btn btn-success btn-sm action-btn" data-toggle="modal" data-target="#edit-<?php echo $customer->id; ?>">Edit</button>
+        <button type="button" class="btn btn-primary btn-sm action-btn" onclick='openRemarkModal(<?php echo $customer->id; ?>, <?php echo json_encode($customer->remarks); ?>)'>Remark</button>
+        <a href="pay.php?customer=<?php echo $customer->id; ?>&action=bill" class="btn btn-primary btn-sm action-btn">Invoice</a>
+        <a href="pay.php?customer=<?php echo $customer->id; ?>" class="btn btn-info btn-sm action-btn">Bill</a>
+        <a href="disconnect_customer.php?customer_id=<?php echo $customer->id; ?>" class="btn btn-danger btn-sm action-btn">DISCONNECT</a>
+    </div>
+    
 											<div class="fade modal" id="edit-<?php echo $customer->id; ?>">
 												<div class="modal-dialog" role="document">
 													<div class="modal-content">

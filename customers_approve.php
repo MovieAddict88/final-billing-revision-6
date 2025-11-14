@@ -123,12 +123,13 @@
 				<tr>
 					<td scope="row"><?=$customer->id ?></td>
 					<td>
-						<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; max-width: 200px;">
-							<button type="button" id="edit" class="btn btn-success btn-sm btn-action" data-toggle="modal" data-target="#edit-<?=$customer->id?>">EDIT</button>
-							<a href="customer_details.php?id=<?=$customer->id?>" class="btn btn-info btn-sm btn-action">VIEW</a>
-							<button type="submit" id="delete" onclick="delData(<?=$customer->id ?>)" class="btn btn-warning btn-sm btn-action">DELETE</button>
-							<button type="button" class="btn btn-primary btn-sm btn-action remark-btn" data-customer-id="<?=$customer->id?>" data-remarks="<?=htmlspecialchars(isset($customer->remarks) ? $customer->remarks : '')?>">REMARK</button>
-						</div>
+						<div style="display: grid; grid-template-columns: 80px 80px; gap: 5px;">
+    <button type="button" class="btn btn-success btn-sm" style="width: 100%; padding: 6px 4px;" data-toggle="modal" data-target="#edit-<?=$customer->id?>">EDIT</button>
+    <a href="customer_details.php?id=<?=$customer->id?>" class="btn btn-info btn-sm" style="width: 100%; padding: 6px 4px;">VIEW</a>
+    <button type="submit" onclick="delData(<?=$customer->id ?>)" class="btn btn-warning btn-sm" style="width: 100%; padding: 6px 4px;">DELETE</button>
+    <button type="button" class="btn btn-primary btn-sm remark-btn" style="width: 100%; padding: 6px 4px;" data-customer-id="<?=$customer->id?>" data-remarks="<?=htmlspecialchars(isset($customer->remarks) ? $customer->remarks : '')?>">REMARK</button>
+</div>
+
 						<div class="fade modal" id="edit-<?=$customer->id?>">
 							<div class="modal-dialog" role="document">
 								<div class="modal-content">
@@ -258,7 +259,7 @@
 							}
 						}
 						?>
-						<a href="disconnect_customer.php?customer_id=<?=$customer->id?>" class="btn btn-danger btn-sm btn-action">DISCONNECT</a>
+					<a href="disconnect_customer.php?customer_id=<?=$customer->id?>" class="btn btn-danger btn-sm" style="width: 165px; margin-top: 5px; padding: 6px 4px; display: block;">DISCONNECT</a>
 						</div>
 					</td>
 					<td class="search"><?=$customer->full_name?></td>
