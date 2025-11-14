@@ -166,7 +166,7 @@ public function getEmployerMonitoringData()
                  WHERE c2.employer_id = u.user_id 
                  AND DATE_FORMAT(ph.paid_at, '%Y-%m') = :current_month),
                 0
-            ) -
+            ) - 
             COALESCE(
                 (SELECT SUM(ph.paid_amount)
                  FROM payment_history ph
