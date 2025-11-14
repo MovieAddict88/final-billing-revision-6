@@ -22,14 +22,28 @@ $customer = $admins->getDisconnectedCustomerInfo($payment->customer_id);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['approve'])) {
         if ($admins->approveReconnectionPayment($request_id)) {
-            echo "<script>window.opener.location.reload(); window.close();</script>";
+            // Set success message and redirect parent window to customers.php
+            $_SESSION['success'] = 'Reconnection request approved successfully. Customer has been reconnected.';
+            echo "<script>
+                if (window.opener && !window.opener.closed) {
+                    window.opener.location.href = 'customers.php';
+                }
+                window.close();
+            </script>";
             exit();
         } else {
             $error_message = "Failed to approve payment.";
         }
     } elseif (isset($_POST['reject'])) {
         if ($admins->rejectReconnectionPayment($request_id)) {
-            echo "<script>window.opener.location.reload(); window.close();</script>";
+            // Set success message and redirect parent window to disconnected_clients.php
+            $_SESSION['success'] = 'Reconnection request rejected successfully.';
+            echo "<script>
+                if (window.opener && !window.opener.closed) {
+                    window.opener.location.href = 'disconnected_clients.php';
+                }
+                window.close();
+            </script>";
             exit();
         } else {
             $error_message = "Failed to reject payment.";
@@ -67,8 +81,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php endif; ?>
                     <hr>
                     <form action="" method="POST">
-                        <button type="submit" name="approve" class="btn btn-success">Approve</button>
-                        <button type="submit" name="reject" class="btn btn-danger">Reject</button>
+                        <button type="submit" name="approve" class="btn btn-success" onclick="return confirm('Are you sure you want to approve this reconnection request?')">Approve</button>
+                        <button type="submit" name="reject" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this reconnection request?')">Reject</button>
+                        <button type="button" class="btn btn-secondary" onclick="window.close()">Close</button>
                     </form>
                 </div>
             </div>

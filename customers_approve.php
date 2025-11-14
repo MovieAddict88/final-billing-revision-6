@@ -75,13 +75,12 @@
 		$start_date = $_POST['start_date'];
 		$due_date = $_POST['due_date'];
 		$end_date = $_POST['end_date'];
-		$exceeding_payment = isset($_POST['exceeding_payment']) ? (float)$_POST['exceeding_payment'] : 0;
 
 		$customerInfo = $admins->getCustomerInfo($id);
 		$old_start_date = $customerInfo ? $customerInfo->start_date : null;
         $old_end_date = $customerInfo ? $customerInfo->end_date : null;
 
-		if (!$admins->updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address,  $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date, $exceeding_payment))
+		if (!$admins->updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address,  $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date))
 		{	
 			//echo "$id $customername $email $full_name $address $contact";
 			echo "Sorry Data could not be Updated !";
@@ -190,10 +189,6 @@
 											<div class="form-group">
 												<label for="due_date">Due Date</label>
 												<input type="date" class="form-control" id="due_date-<?=$customer->id?>"   value="<?=$customer->due_date?>" required>
-											</div>
-											<div class="form-group">
-												<label for="exceeding_payment">Exceeding Payment to Use</label>
-												<input type="number" class="form-control" id="exceeding_payment-<?=$customer->id?>" placeholder="0.00">
 											</div>
 											<div class="form-group">
 												<label for="conlocation">Connection Location</label>

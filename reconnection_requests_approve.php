@@ -20,8 +20,11 @@ if (isset($requests) && sizeof($requests) > 0) {
             <td><?= htmlspecialchars($request->reference_number) ?></td>
             <td><?= htmlspecialchars($request->payment_date) ?></td>
             <td>
-                <a href="approve_reconnection.php?id=<?= $request->id ?>" class="btn btn-success">Approve</a>
-                <a href="reject_reconnection.php?id=<?= $request->id ?>" class="btn btn-danger">Reject</a>
+                <a href="view_reconnection_payment.php?id=<?= $request->id ?>" 
+                   class="btn btn-info" 
+                   onclick="window.open(this.href, 'ReconnectionPayment', 'width=800,height=600,scrollbars=yes'); return false;">
+                   View Details
+                </a>
             </td>
         </tr>
     <?php }
