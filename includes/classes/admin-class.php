@@ -164,9 +164,18 @@ public function getEmployerMonitoringData()
                  FROM payment_history ph
                  INNER JOIN customers c2 ON ph.customer_id = c2.id
                  WHERE c2.employer_id = u.user_id 
-                 AND DATE_FORMAT(ph.paid_at, '%Y-%m') = :current_month AND ph.payment_method != 'Discount'),
+                 AND DATE_FORMAT(ph.paid_at, '%Y-%m') = :current_month),
                 0
-            ) AS monthly_paid_collection,
+            ) -
+            COALESCE(
+                (SELECT SUM(ph.paid_amount)
+                 FROM payment_history ph
+                 INNER JOIN customers c2 ON ph.customer_id = c2.id
+                 WHERE c2.employer_id = u.user_id
+                 AND DATE_FORMAT(ph.paid_at, '%Y-%m') = :current_month AND ph.payment_method = 'Discount'),
+                0
+            )
+            AS monthly_paid_collection,
             COALESCE(
                 SUM(CASE WHEN DATE_FORMAT(p.g_date, '%Y-%m') = :current_month THEN p.balance ELSE 0 END),
                 0
