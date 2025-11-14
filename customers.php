@@ -255,9 +255,16 @@ $admins = new Admins($dbh);
             $.ajax({
                 method:"POST",
                 url: "customers_approve.php?p=del",
-                data: "id="+del_id,
-                success: function (data){
-                    viewData();
+                data: { id: del_id },
+                dataType: 'json',
+                success: function (response){
+                    alert(response.message);
+                    if (response.success) {
+                        window.location.href = 'index.php';
+                    }
+                },
+                error: function(){
+                    alert('An error occurred while deleting the customer.');
                 }
             });
         }
