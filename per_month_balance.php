@@ -5,10 +5,10 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Get monthly balances (grouped by Year + Month)
+// Get monthly balances from payments table (grouped by Year + Month)
 $sql = "SELECT DATE_FORMAT(created_at, '%M %Y') AS month, 
                SUM(amount) AS balance 
-        FROM bills 
+        FROM payments 
         GROUP BY YEAR(created_at), MONTH(created_at)
         ORDER BY created_at DESC";
 
