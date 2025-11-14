@@ -61,7 +61,11 @@ if (isset($results) && sizeof($results) > 0) {
                 $reconnection_request = $admins->getPendingReconnectionRequest($result->id);
                 if ($reconnection_request) {
                     if ($user_role == 'admin') { ?>
-                        <a href="view_reconnection_payment.php?id=<?= $reconnection_request->id ?>" class="btn btn-info">View Request</a>
+                        <a href="view_reconnection_payment.php?id=<?= $reconnection_request->id ?>" 
+                           class="btn btn-info" 
+                           onclick="window.open(this.href, 'ReconnectionPayment', 'width=800,height=600,scrollbars=yes'); return false;">
+                           View Request
+                        </a>
                     <?php } else { ?>
                         <button class="btn btn-default" disabled>Pending</button>
                     <?php }
