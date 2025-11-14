@@ -44,14 +44,14 @@
 				<table class="table table-striped table-bordered">
 				<thead class="thead-inverse">
 				  <tr class="info">
-				    <th>ID </th>
-				    <th>Name</th>
-				    <th>Submitted on</th>
-				    <th>Amount</th>
-				    <th>Method</th>
-				    <th>Reference #</th>
-				    <th>Status</th>
-				    <th>Action</th>
+				    <th style="background-color: #284390; color: white;">ID </th>
+				    <th style="background-color: #284390; color: white;">Name</th>
+				    <th style="background-color: #284390; color: white;">Submitted on</th>
+				    <th style="background-color: #284390; color: white;">Amount</th>
+				    <th style="background-color: #284390; color: white;">Method</th>
+				    <th style="background-color: #284390; color: white;">Reference #</th>
+				    <th style="background-color: #284390; color: white;">Status</th>
+				    <th style="background-color: #284390; color: white;">Action</th>
 				  </tr>
 				</thead>
 			  <tbody>

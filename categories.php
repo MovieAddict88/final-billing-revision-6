@@ -32,9 +32,9 @@
         <table class="table table-striped table-bordered">
             <thead class="thead-inverse">
                 <tr>
-                    <th>SL </th>
-                    <th>Name</th>
-                    <th>Action</th>
+                    <th style="background-color: #284390; color: white;">SL </th>
+                    <th style="background-color: #284390; color: white;">Name</th>
+                    <th style="background-color: #284390; color: white;">Action</th>
                 </tr>
             </thead>
             <tbody>

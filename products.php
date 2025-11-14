@@ -44,12 +44,12 @@
 		<table id="product_data" class="table table-striped">
 			<thead class="thead">
 			  <tr class="info">
-			    <th>ID</th>
-			    <th>Action</th>
-			    <th>Name</th>
-			    <th>Details</th>
-			    <th>Category</th>
-			    <th>Unit</th>
+			    <th style="background-color: #284390; color: white;">ID</th>
+			    <th style="background-color: #284390; color: white;">Action</th>
+			    <th style="background-color: #284390; color: white;">Name</th>
+			    <th style="background-color: #284390; color: white;">Details</th>
+			    <th style="background-color: #284390; color: white;">Category</th>
+			    <th style="background-color: #284390; color: white;">Unit</th>
 			  </tr>
 			</thead>
 		  <tbody>

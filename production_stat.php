@@ -26,12 +26,12 @@
 		<table class="table center table-striped table-bordered" id="grid-basic">
 			<thead class="thead-inverse">
 			  <tr class="info">
-			    <th>Product ID</th>
-			    <th>Product Name</th>
-			    <th>Category</th>
-			    <th>Details</th>
-			    <th>Quantity</th>
-			    <th>Action</th>
+			    <th style="background-color: #284390; color: white;">Product ID</th>
+			    <th style="background-color: #284390; color: white;">Product Name</th>
+			    <th style="background-color: #284390; color: white;">Category</th>
+			    <th style="background-color: #284390; color: white;">Details</th>
+			    <th style="background-color: #284390; color: white;">Quantity</th>
+			    <th style="background-color: #284390; color: white;">Action</th>
 			  </tr>
 			</thead>
 		  <tbody>
