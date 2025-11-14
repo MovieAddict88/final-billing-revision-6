@@ -2389,15 +2389,17 @@ public function getDisconnectedCustomerInfo($id)
         $current_year = date('Y');
         $sql = "
             SELECT
-                MONTH(paid_at) as month,
-                SUM(paid_amount) as total
+                MONTH(ph.paid_at) as month,
+                SUM(ph.paid_amount) as total
             FROM
-                payment_history
+                payment_history ph
+            INNER JOIN
+                customers c ON ph.customer_id = c.id
             WHERE
-                YEAR(paid_at) = :year
-                AND payment_method != 'Discount'
+                YEAR(ph.paid_at) = :year
+                AND ph.payment_method != 'Discount'
             GROUP BY
-                MONTH(paid_at)
+                MONTH(ph.paid_at)
         ";
 
         $request = $this->dbh->prepare($sql);
@@ -2441,10 +2443,11 @@ public function getDisconnectedCustomerInfo($id)
 
         // Fetch cash collection data for the last 7 days in one query
         $cash_sql = "
-            SELECT DATE(paid_at) as p_date, COALESCE(SUM(paid_amount), 0) as total
-            FROM payment_history
-            WHERE DATE(paid_at) >= :start_date AND payment_method != 'Discount'
-            GROUP BY DATE(paid_at)
+            SELECT DATE(ph.paid_at) as p_date, COALESCE(SUM(ph.paid_amount), 0) as total
+            FROM payment_history ph
+            INNER JOIN customers c ON ph.customer_id = c.id
+            WHERE DATE(ph.paid_at) >= :start_date AND ph.payment_method != 'Discount'
+            GROUP BY DATE(ph.paid_at)
         ";
         $cash_req = $this->dbh->prepare($cash_sql);
         $cash_req->execute(['start_date' => $start_date]);
@@ -2456,10 +2459,11 @@ public function getDisconnectedCustomerInfo($id)
 
         // Fetch balance data for the last 7 days in one query
         $balance_sql = "
-            SELECT DATE(g_date) as g_date, COALESCE(SUM(balance), 0) as total
-            FROM payments
-            WHERE DATE(g_date) >= :start_date AND status IN ('Unpaid', 'Balance')
-            GROUP BY DATE(g_date)
+            SELECT DATE(p.g_date) as g_date, COALESCE(SUM(p.balance), 0) as total
+            FROM payments p
+            INNER JOIN customers c ON p.customer_id = c.id
+            WHERE DATE(p.g_date) >= :start_date AND p.status IN ('Unpaid', 'Balance')
+            GROUP BY DATE(p.g_date)
         ";
         $balance_req = $this->dbh->prepare($balance_sql);
         $balance_req->execute(['start_date' => $start_date]);
