@@ -2380,4 +2380,43 @@ public function getDisconnectedCustomerInfo($id)
             return false;
         }
     }
+
+    public function getMonthlyBillCollection()
+    {
+        $current_year = date('Y');
+        $sql = "
+            SELECT
+                MONTH(paid_at) as month,
+                SUM(paid_amount) as total
+            FROM
+                payment_history
+            WHERE
+                YEAR(paid_at) = :year
+                AND payment_method != 'Discount'
+            GROUP BY
+                MONTH(paid_at)
+        ";
+
+        $request = $this->dbh->prepare($sql);
+        $request->execute(['year' => $current_year]);
+        $results = $request->fetchAll();
+
+        // Initialize an array for all 12 months with 0
+        $monthly_totals = array_fill(1, 12, 0);
+
+        foreach ($results as $row) {
+            $monthly_totals[(int)$row->month] = (float)$row->total;
+        }
+
+        $labels = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $labels[] = date('M', mktime(0, 0, 0, $m, 1));
+        }
+
+        return [
+            'labels' => $labels,
+            'data' => array_values($monthly_totals),
+            'year' => $current_year,
+        ];
+    }
 }

@@ -717,7 +717,8 @@ if ($user_role == 'employer') {
 </div>
 <?php
 } else {
-    // Admin Dashboard (unchanged)
+    // Admin Dashboard
+    $monthly_collection_data = $admins->getMonthlyBillCollection();
 ?>
 <!-- Admin dashboard code remains the same -->
 <style>
@@ -793,8 +794,8 @@ if ($user_role == 'employer') {
 </div>
 <div class="col-md-6">
     <div class="panel panel-default">
-        <div class="panel-heading">
-        Monthly Bill Collection : 2016
+        <div class="panel-heading" id="monthly-bill-collection-header">
+        Monthly Bill Collection : <?php echo $monthly_collection_data['year']; ?>
         </div>
         <div class="panel-body">
             <canvas id="chart2">
@@ -906,9 +907,9 @@ function updateData(str){
             }
         });
         <?php else: ?>
-        // Admin dashboard JavaScript remains the same
-        var ctx = document.getElementById('myChart').getContext('2d');
-        var myChart = new Chart(ctx, {
+        // Admin dashboard JavaScript
+        var ctx1 = document.getElementById('myChart').getContext('2d');
+        var myChart1 = new Chart(ctx1, {
             type: 'bar',
             data: {
                 labels: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
@@ -923,14 +924,16 @@ function updateData(str){
                 }]
             }
         });
-        var ctx = document.getElementById('chart2').getContext('2d');
-        var myChart = new Chart(ctx, {
+
+        var monthlyCollectionData = <?php echo json_encode($monthly_collection_data); ?>;
+        var ctx2 = document.getElementById('chart2').getContext('2d');
+        var myChart2 = new Chart(ctx2, {
             type: 'bar',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                labels: monthlyCollectionData.labels,
                 datasets: [{
                     label: 'Monthly Bill Collection',
-                    data: [50000, 60000, 30000, 45000, 48000, 38000, 80000, 50000, 0],
+                    data: monthlyCollectionData.data,
                     backgroundColor: "rgba(0,255,51,0.6)"
                 }]
             }
@@ -938,7 +941,7 @@ function updateData(str){
 
 
         $.ajax({
-            url: "chart.php",
+            url: "daily_chart_data.php",
             method: "GET",
             dataType: 'JSON',
             success: function(data) {
