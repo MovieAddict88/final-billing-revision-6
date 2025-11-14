@@ -32,7 +32,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $payment_time = $_POST['payment_time'];
     $r_months = isset($_POST['r_month']) ? $_POST['r_month'] : [];
 
-    if (!empty($selected_bills)) {
+    if (isset($_POST['apply_advance_payment'])) {
+        $amount_to_use = isset($_POST['use_advance_payment']) ? (float)$_POST['use_advance_payment'] : 0;
+        if ($amount_to_use > 0 && !empty($selected_bills)) {
+            if ($admins->processExceedingPayment($customer_id, $amount_to_use, $selected_bills)) {
+                echo "<script>alert('Advance payment applied successfully.'); window.location.href = 'customer_details.php?id=$customer_id';</script>";
+                exit();
+            } else {
+                $error_message = "Failed to apply advance payment. Please ensure the amount does not exceed the balance.";
+            }
+        } else {
+            $error_message = "Please enter an amount and select at least one bill to apply the advance payment to.";
+        }
+    } elseif (!empty($selected_bills)) {
         if ($admins->processManualPayment($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_method, $screenshot, $payment_date, $payment_time, $r_months)) {
             echo "<script>alert('Payment submitted successfully and is pending approval.'); window.location.href = 'index.php';</script>";
             exit();
@@ -59,8 +71,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php if ($advance_balance > 0): ?>
                         <div class="alert alert-info">
                             You have an advance payment balance of <strong><?php echo htmlspecialchars(number_format($advance_balance, 2)); ?></strong>.
-                            This will be automatically applied to your future bills.
                         </div>
+                        <form action="" method="POST" id="advance_payment_form">
+                            <input type="hidden" name="customer" value="<?php echo $customer_id; ?>">
+                            <div class="form-group">
+                                <label for="use_advance_payment">Use Advance Payment</label>
+                                <div class="input-group">
+                                    <input type="number" name="use_advance_payment" id="use_advance_payment" class="form-control" step="0.01" min="0" max="<?php echo htmlspecialchars($advance_balance); ?>" placeholder="Enter amount to use">
+                                    <div class="input-group-append">
+                                        <button type="submit" name="apply_advance_payment" class="btn btn-success">Apply to Selected Bills</button>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">Select bills below and enter the amount you wish to pay using your advance balance.</small>
+                            </div>
+                        </form>
                     <?php endif; ?>
                     <form action="" method="POST" enctype="multipart/form-data">
                         <input type="hidden" name="customer" value="<?php echo $customer_id; ?>">
@@ -174,6 +198,31 @@ require_once 'includes/customer_footer.php';
         if (selectable.length === 1) {
             selectable[0].checked = true;
             updateAmountFromSelection();
+        }
+
+        var advancePaymentForm = document.getElementById('advance_payment_form');
+        if (advancePaymentForm) {
+            advancePaymentForm.addEventListener('submit', function(e) {
+                var selectedBills = [];
+                checkboxes.forEach(function(cb) {
+                    if (cb.checked) {
+                        selectedBills.push(cb.value);
+                    }
+                });
+
+                if (selectedBills.length > 0) {
+                    selectedBills.forEach(function(billId) {
+                        var input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'bills[]';
+                        input.value = billId;
+                        advancePaymentForm.appendChild(input);
+                    });
+                } else {
+                    e.preventDefault();
+                    alert('Please select at least one bill to apply the advance payment to.');
+                }
+            });
         }
     })();
 </script>
