@@ -249,6 +249,7 @@ public function getEmployerMonitoringData()
                 LEFT JOIN (
                     SELECT customer_id, SUM(amount - balance) AS total_paid, SUM(balance) AS total_balance
                     FROM payments
+                    WHERE status NOT IN ('Pending', 'Rejected')
                     GROUP BY customer_id
                 ) p ON p.customer_id = c.id
                 WHERE
@@ -300,6 +301,7 @@ public function fetchCustomersByEmployer($employer_id, $limit = 10)
                 SUM(balance) as total_balance
             FROM
                 payments
+            WHERE status NOT IN ('Pending', 'Rejected')
             GROUP BY
                 customer_id
             ) p ON c.id = p.customer_id
@@ -451,6 +453,7 @@ public function fetchCustomersByEmployerPage($employer_id, $offset = 0, $limit =
                 SUM(balance) as total_balance
             FROM
                 payments
+            WHERE status NOT IN ('Pending', 'Rejected')
             GROUP BY
                 customer_id
             ) p ON c.id = p.customer_id
@@ -632,6 +635,7 @@ public function countCustomersByEmployer($employer_id)
                 LEFT JOIN (
                     SELECT customer_id, SUM(amount - balance) AS total_paid, SUM(balance) AS total_balance
                     FROM payments
+                    WHERE status NOT IN ('Pending', 'Rejected')
                     GROUP BY customer_id
                 ) p ON p.customer_id = c.id
                 WHERE
@@ -740,6 +744,7 @@ public function countCustomersByEmployer($employer_id)
                     SUM(balance) as total_balance
                 FROM
                     payments
+                WHERE status NOT IN ('Pending', 'Rejected')
                 GROUP BY
                     customer_id
                 ) p ON c.id = p.customer_id
@@ -1208,7 +1213,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         LEFT JOIN kp_user u ON c.employer_id = u.user_id
         LEFT JOIN (
             SELECT customer_id, SUM(amount - balance) as total_paid, SUM(balance) as total_balance
-            FROM payments GROUP BY customer_id
+            FROM payments WHERE status NOT IN ('Pending', 'Rejected') GROUP BY customer_id
         ) p ON c.id = p.customer_id
         LEFT JOIN
             (SELECT
@@ -1456,6 +1461,9 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
      public function fetchBilling($limit = 100)
     {
         $limit = (int) $limit;
+        // This query fetches all non-finalized bills, including 'Pending', 'Unpaid', and 'Balance'.
+        // It intentionally omits a `reference_number` filter to ensure that pending payment
+        // requests, which are structured differently, are visible in the bills list as per the user's request.
         $request = $this->dbh->prepare("
         SELECT
             id,
@@ -1467,8 +1475,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
             p_date,
             status
         FROM payments
-        WHERE status IN ('Unpaid', 'Balance', 'Pending')
-          AND reference_number NOT LIKE 'ref-bill-id:%'
+        WHERE status NOT IN ('Paid', 'Approved')
         ORDER BY id DESC
         LIMIT :limit
     ");
