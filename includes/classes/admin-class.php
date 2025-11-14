@@ -1586,7 +1586,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         return $request->execute([$new_balance, $payment_method, $reference_number, $submitted_amount, $gcash_number, $screenshot_path, $payment_id]);
     }
 
-    public function processManualPayment($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_method, $screenshot = null, $payment_date = null, $payment_time = null)
+    public function processManualPayment($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_method, $screenshot = null, $payment_date = null, $payment_time = null, $r_months = [])
     {
    $paid_at = null;
    if ($payment_date && $payment_time) {
@@ -1619,6 +1619,8 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                     continue;
                 }
 
+                $r_month = isset($r_months[$bill_id]) ? $r_months[$bill_id] : $bill->r_month;
+
                 $due_amount = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
 
                 if ($remaining_amount >= $due_amount) {
@@ -1630,9 +1632,10 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                 }
 
                 $request = $this->dbh->prepare(
-                    "UPDATE payments SET status = 'Pending', balance = ?, payment_method = ?, employer_id = ?, reference_number = ?, screenshot = ?, gcash_name = ?, gcash_number = ?, payment_timestamp = ? WHERE id = ?"
+                    "UPDATE payments SET status = 'Pending', r_month = ?, balance = ?, payment_method = ?, employer_id = ?, reference_number = ?, screenshot = ?, gcash_name = ?, gcash_number = ?, payment_timestamp = ? WHERE id = ?"
                 );
                 $request->execute([
+                    $r_month,
                     $new_balance,
                     $payment_method,
                     $employer_id,
