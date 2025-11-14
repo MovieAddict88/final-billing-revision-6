@@ -300,8 +300,6 @@ public function fetchCustomersByEmployer($employer_id, $limit = 10)
                 SUM(balance) as total_balance
             FROM
                 payments
-            WHERE
-                payment_method != 'Discount'
             GROUP BY
                 customer_id
             ) p ON c.id = p.customer_id
@@ -453,8 +451,6 @@ public function fetchCustomersByEmployerPage($employer_id, $offset = 0, $limit =
                 SUM(balance) as total_balance
             FROM
                 payments
-            WHERE
-                payment_method != 'Discount'
             GROUP BY
                 customer_id
             ) p ON c.id = p.customer_id
@@ -1208,9 +1204,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         LEFT JOIN kp_user u ON c.employer_id = u.user_id
         LEFT JOIN (
             SELECT customer_id, SUM(amount - balance) as total_paid, SUM(balance) as total_balance
-            FROM payments
-            WHERE payment_method != 'Discount'
-            GROUP BY customer_id
+            FROM payments GROUP BY customer_id
         ) p ON c.id = p.customer_id
         LEFT JOIN
             (SELECT
