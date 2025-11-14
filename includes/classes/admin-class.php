@@ -105,6 +105,26 @@ class Admins
         return false;
     }
 
+    public function fetchPendingSubmissions($limit = 100)
+    {
+        $limit = (int) $limit;
+        $request = $this->dbh->prepare("
+            SELECT
+                s.*,
+                c.full_name as customer_name
+            FROM payment_submissions s
+            JOIN customers c ON s.customer_id = c.id
+            WHERE s.status = 'pending'
+            ORDER BY s.created_at ASC
+            LIMIT :limit
+        ");
+        $request->bindValue(':limit', $limit, PDO::PARAM_INT);
+        if ($request->execute()) {
+            return $request->fetchAll();
+        }
+        return false;
+    }
+
     /**
      * Fetch admins paginated with optional search query.
      */
@@ -1593,10 +1613,10 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
 
     public function processManualPayment($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_method, $screenshot = null, $payment_date = null, $payment_time = null, $r_months = [])
     {
-   $paid_at = null;
-   if ($payment_date && $payment_time) {
-    $paid_at = date('Y-m-d H:i:s', strtotime("$payment_date $payment_time"));
-   }
+        $paid_at = null;
+        if ($payment_date && $payment_time) {
+            $paid_at = date('Y-m-d H:i:s', strtotime("$payment_date $payment_time"));
+        }
 
         $screenshot_path = null;
         if ($screenshot && $screenshot['error'] == UPLOAD_ERR_OK) {
@@ -1612,6 +1632,21 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         try {
             $this->dbh->beginTransaction();
 
+            // Create a single payment submission record
+            $request = $this->dbh->prepare(
+                "INSERT INTO payment_submissions (customer_id, employer_id, total_amount, payment_method, reference_number, screenshot, payment_date) VALUES (?, ?, ?, ?, ?, ?, ?)"
+            );
+            $request->execute([
+                $customer_id,
+                $employer_id,
+                (float)$amount,
+                $payment_method,
+                $reference_number,
+                $screenshot_path,
+                $paid_at
+            ]);
+            $submission_id = $this->dbh->lastInsertId();
+
             $remaining_amount = (float)$amount;
 
             foreach ($selected_bills as $bill_id) {
@@ -1624,47 +1659,36 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                     continue;
                 }
 
+                $due_amount = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
+                $payment_for_this_bill = min($remaining_amount, $due_amount);
                 $r_month = isset($r_months[$bill_id]) ? $r_months[$bill_id] : $bill->r_month;
 
-                $due_amount = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
 
-                if ($remaining_amount >= $due_amount) {
-                    $new_balance = 0;
-                    $payment_for_this_bill = $due_amount;
-                } else {
-                    $new_balance = $due_amount - $remaining_amount;
-                    $payment_for_this_bill = $remaining_amount;
-                }
-
-                $request = $this->dbh->prepare(
-                    "UPDATE payments SET status = 'Pending', r_month = ?, balance = ?, payment_method = ?, employer_id = ?, reference_number = ?, screenshot = ?, gcash_name = ?, gcash_number = ?, payment_timestamp = ? WHERE id = ?"
+                // Create a submission item for each bill
+                $item_request = $this->dbh->prepare(
+                    "INSERT INTO payment_submission_items (submission_id, payment_id, amount_paid, r_month) VALUES (?, ?, ?, ?)"
                 );
-                $request->execute([
-                    $r_month,
-                    $new_balance,
-                    $payment_method,
-                    $employer_id,
-                    $reference_number,
-                    $screenshot_path,
-                    $payment_for_this_bill,
-                    $amount,
-                    $paid_at,
-                    $bill_id
-                ]);
+                $item_request->execute([$submission_id, $bill_id, $payment_for_this_bill, $r_month]);
 
-
+                // Update the original bill to a pending state, but don't overwrite payment details
+                $update_bill_request = $this->dbh->prepare("UPDATE payments SET status = 'Pending' WHERE id = ? AND status != 'Pending'");
+                $update_bill_request->execute([$bill_id]);
 
                 $remaining_amount -= $payment_for_this_bill;
             }
+
             if ($remaining_amount > 0) {
-                $request = $this->dbh->prepare("INSERT INTO advance_payments (customer_id, amount) VALUES (?, ?)");
-                $request->execute([$customer_id, $remaining_amount]);
+                // Handle overpayment by adding to advance payments
+                $advance_request = $this->dbh->prepare("INSERT INTO advance_payments (customer_id, amount) VALUES (?, ?)");
+                $advance_request->execute([$customer_id, $remaining_amount]);
             }
 
             $this->dbh->commit();
             return true;
         } catch (Exception $e) {
             $this->dbh->rollBack();
+            // It's good practice to log the error
+            error_log($e->getMessage());
             return false;
         }
     }
@@ -1753,88 +1777,123 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         }
     }
 
-    public function approvePayment($payment_id, $paid_at = null)
+    public function getPaymentSubmissionById($submission_id)
     {
-        $payment = $this->getPaymentById($payment_id);
-        if (!$payment) {
-            return false;
+        $request = $this->dbh->prepare("SELECT * FROM payment_submissions WHERE id = ?");
+        if ($request->execute([$submission_id])) {
+            return $request->fetch();
         }
-        if ($payment->screenshot && file_exists($payment->screenshot)) {
-            unlink($payment->screenshot);
-        }
-        // Determine the submitted amount for this approval
-        $submitted_amount = 0.0;
-        if (isset($payment->gcash_name) && is_numeric($payment->gcash_name)) {
-            $submitted_amount = (float)$payment->gcash_name;
-        } else {
-            // Fallback: compute remaining unrecorded portion by subtracting any previously recorded amounts
-            $sumRequest = $this->dbh->prepare("SELECT COALESCE(SUM(paid_amount),0) AS total_recorded FROM payment_history WHERE payment_id = ?");
-            $sumRequest->execute([$payment_id]);
-            $row = $sumRequest->fetch();
-            $total_recorded = $row ? (float)$row->total_recorded : 0.0;
-            $already_paid_total = (float)$payment->amount - (float)$payment->balance;
-            $submitted_amount = max(0.0, $already_paid_total - $total_recorded);
-        }
-
-        // Insert a history entry for this payment approval
-        if ($submitted_amount > 0) {
-            $this->insertPaymentHistoryEntry($payment, $submitted_amount, $paid_at);
-        }
-
-        $new_status = ($payment->balance <= 0) ? 'Paid' : 'Unpaid';
-   $p_date_sql = $paid_at ? '?' : 'NOW()';
-        $request = $this->dbh->prepare("UPDATE payments SET status = ?, p_date = $p_date_sql, screenshot = NULL, gcash_name = NULL, gcash_number = NULL, payment_timestamp = ? WHERE id = ?");
-   $params = [$new_status];
-   if ($paid_at) {
-    $params[] = $paid_at;
-   }
-   $params[] = $payment->payment_timestamp;
-   $params[] = $payment_id;
-        return $request->execute($params);
+        return false;
     }
 
-    public function rejectPayment($payment_id)
+    public function approvePayment($submission_id, $paid_at = null)
     {
-        $payment = $this->getPaymentById($payment_id);
-        if (!$payment) {
+        $submission = $this->getPaymentSubmissionById($submission_id);
+        if (!$submission) {
             return false;
         }
 
-        if ($payment->screenshot && file_exists($payment->screenshot)) {
-            unlink($payment->screenshot);
+        try {
+            $this->dbh->beginTransaction();
+
+            // Get all items for this submission
+            $items_request = $this->dbh->prepare("SELECT * FROM payment_submission_items WHERE submission_id = ?");
+            $items_request->execute([$submission_id]);
+            $items = $items_request->fetchAll();
+
+            foreach ($items as $item) {
+                $payment = $this->getPaymentById($item->payment_id);
+                if (!$payment) {
+                    continue; // Or handle error
+                }
+
+                $due_amount = ($payment->balance > 0) ? (float)$payment->balance : (float)$payment->amount;
+                $paid_amount_for_item = (float)$item->amount_paid;
+
+                $new_balance = $due_amount - $paid_amount_for_item;
+                $new_status = ($new_balance <= 0) ? 'Paid' : 'Balance';
+
+                // Update the actual payment/bill record
+                $update_payment_request = $this->dbh->prepare(
+                    "UPDATE payments SET r_month = ?, balance = ?, status = ?, p_date = ? WHERE id = ?"
+                );
+                $update_payment_request->execute([$item->r_month, $new_balance, $new_status, $paid_at ?: date('Y-m-d H:i:s'), $item->payment_id]);
+
+                // Create a history entry for this part of the payment
+                $payment->balance = $new_balance; // Update for history
+                $payment->payment_method = $submission->payment_method;
+                $payment->reference_number = $submission->reference_number;
+                $payment->payment_timestamp = $submission->payment_date;
+                $this->insertPaymentHistoryEntry($payment, $paid_amount_for_item, $paid_at);
+            }
+
+            // Mark the submission as approved
+            $update_submission_request = $this->dbh->prepare("UPDATE payment_submissions SET status = 'approved' WHERE id = ?");
+            $update_submission_request->execute([$submission_id]);
+
+            // Clean up screenshot if it exists
+            if ($submission->screenshot && file_exists($submission->screenshot)) {
+                unlink($submission->screenshot);
+            }
+
+            $this->dbh->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->dbh->rollBack();
+            error_log($e->getMessage());
+            return false;
+        }
+    }
+
+    public function rejectPayment($submission_id)
+    {
+        $submission = $this->getPaymentSubmissionById($submission_id);
+        if (!$submission) {
+            return false;
         }
 
-        // Restore balance to the state BEFORE the pending submission.
-        // The submitted amount for this pending entry is stored temporarily
-        // in gcash_name (for both Manual and e-wallet payments). If not
-        // available, derive it from the ledger to avoid resetting prior
-        // partial payments.
-        $submitted_amount = 0.0;
-        if (isset($payment->gcash_name) && is_numeric($payment->gcash_name)) {
-            $submitted_amount = (float)$payment->gcash_name;
-        } else {
-            // Fallback: compute amount included in this pending update that
-            // is not yet recorded in payment_history.
-            $sumRequest = $this->dbh->prepare("SELECT COALESCE(SUM(paid_amount),0) AS total_recorded FROM payment_history WHERE payment_id = ?");
-            $sumRequest->execute([$payment_id]);
-            $row = $sumRequest->fetch();
-            $total_recorded = $row ? (float)$row->total_recorded : 0.0;
-            $already_paid_total = (float)$payment->amount - (float)$payment->balance; // includes the pending part
-            $submitted_amount = max(0.0, $already_paid_total - $total_recorded);
-        }
+        try {
+            $this->dbh->beginTransaction();
+            // Mark the submission as rejected
+            $update_submission_request = $this->dbh->prepare("UPDATE payment_submissions SET status = 'rejected' WHERE id = ?");
+            $update_submission_request->execute([$submission_id]);
 
-        // Current balance is (previous_due - submitted_amount). Add back the
-        // submitted amount to restore the previous due, and clamp within [0, amount].
-        $restore_balance = (float)$payment->balance + $submitted_amount;
-        if ($restore_balance > (float)$payment->amount) {
-            $restore_balance = (float)$payment->amount;
-        }
-        if ($restore_balance < 0) {
-            $restore_balance = 0.0;
-        }
+            // Get all items for this submission to check if we need to revert "Pending" status
+            $items_request = $this->dbh->prepare("SELECT * FROM payment_submission_items WHERE submission_id = ?");
+            $items_request->execute([$submission_id]);
+            $items = $items_request->fetchAll();
 
-        $request = $this->dbh->prepare("UPDATE payments SET status = 'Rejected', balance = ?, screenshot = NULL, gcash_name = NULL, gcash_number = NULL WHERE id = ?");
-        return $request->execute([$restore_balance, $payment_id]);
+            foreach ($items as $item) {
+                // Check if there are other pending submissions for the same bill
+                $other_pending_request = $this->dbh->prepare(
+                    "SELECT COUNT(*) as count FROM payment_submission_items si JOIN payment_submissions s ON si.submission_id = s.id WHERE si.payment_id = ? AND s.status = 'pending' AND si.submission_id != ?"
+                );
+                $other_pending_request->execute([$item->payment_id, $submission_id]);
+                $other_pending_count = $other_pending_request->fetch()->count;
+
+                // If no other pending submissions, revert the bill's status from 'Pending' to 'Unpaid' or 'Balance'
+                if ($other_pending_count == 0) {
+                    $payment = $this->getPaymentById($item->payment_id);
+                    if ($payment && $payment->status === 'Pending') {
+                        $new_status = ((float)$payment->balance < (float)$payment->amount && (float)$payment->balance > 0) ? 'Balance' : 'Unpaid';
+                        $revert_status_request = $this->dbh->prepare("UPDATE payments SET status = ? WHERE id = ?");
+                        $revert_status_request->execute([$new_status, $item->payment_id]);
+                    }
+                }
+            }
+
+            // Clean up screenshot if it exists
+            if ($submission->screenshot && file_exists($submission->screenshot)) {
+                unlink($submission->screenshot);
+            }
+
+            $this->dbh->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->dbh->rollBack();
+            error_log($e->getMessage());
+            return false;
+        }
     }
     
     public function getAdvancePaymentBalance($customer_id)

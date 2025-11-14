@@ -38,78 +38,45 @@
 		</div>
 		<div class="col-md-12 col-sm-12" id="bill_table">
 			<?php
-			  $billing = $admins->fetchBilling();
-			  if (isset($billing) && sizeof($billing) > 0){ ?>
+			  $submissions = $admins->fetchPendingSubmissions();
+			  if (isset($submissions) && sizeof($submissions) > 0){ ?>
 				<div class="table-responsive">
 				<table class="table table-striped table-bordered">
 				<thead class="thead-inverse">
 				  <tr class="info">
 				    <th>ID </th>
 				    <th>Name</th>
-				    <th>Generated on</th>
-				    <th>Package</th>
-				    <th>Months</th>
-				    <th>Amounts</th>
-				    <th>Due Date</th>
+				    <th>Submitted on</th>
+				    <th>Amount</th>
+				    <th>Method</th>
+				    <th>Reference #</th>
 				    <th>Status</th>
 				    <th>Action</th>
 				  </tr>
 				</thead>
 			  <tbody>
 				<?php
-			  	foreach ($billing as $bill) {
-			  		$client_id = $bill->customer_id;
-			  		$customer_info = $admins->getCustomerInfo($client_id);
-			  		$customer_name = $customer_info->full_name;
-						$package_id = !empty($bill->package_id) ? $bill->package_id : $customer_info->package_id;
-						$packageInfo = $admins->getPackageInfo($package_id);
-						$package_name = $packageInfo ? $packageInfo->name : 'N/A';
+				foreach ($submissions as $submission) {
 			  	 	?>
 			  <tr>
-			  	<td scope="row"><?=$bill->id?></td>
-			  	<td><?=$customer_name?></td>
-			  	<td><?=$bill->g_date?></td>
-			  	<td><?=$package_name?></td>
-			  	<td><?=$bill->months?></td>
-			  	<td>₱<?=number_format($bill->total, 2)?></td>
-				<td><?=$customer_info->due_date?></td>
+				<td scope="row"><?=$submission->id?></td>
+				<td><?=$submission->customer_name?></td>
+				<td><?=$submission->created_at?></td>
+				<td>₱<?=number_format($submission->total_amount, 2)?></td>
+				<td><?=$submission->payment_method?></td>
+				<td><?=$submission->reference_number?></td>
 				<td>
-					<?php 
-						$status = $bill->status;
-						$status_class = '';
-						switch($status) {
-							case 'Paid':
-								$status_class = 'label-success';
-								break;
-							case 'Balance':
-								$status_class = 'label-warning';
-								break;
-							case 'Unpaid':
-								$status_class = 'label-danger';
-								break;
-							case 'Pending':
-								$status_class = 'label-info';
-								break;
-							default:
-								$status_class = 'label-default';
-						}
-					?>
-					<span class="label <?=$status_class?>"><?=$status?></span>
+					<span class="label label-info">Pending</span>
 				</td>
 				<td>
-					<?php if ($bill->status == 'Pending'): ?>
-						<button type="button" onClick="view_payment(<?=$bill->id?>)" class="btn btn-warning">View</button>
-					<?php else: ?>
-						<button type="button" onClick="pay(<?=$client_id?>)" class="btn btn-info">Pay</button>
-						<button onClick="bill(<?=$client_id?>)" type="button" class="btn btn-info">Bill</button>
-					<?php endif; ?>
+					<button type="button" onClick="view_payment(<?=$submission->id?>)" class="btn btn-warning">View</button>
 				</td>
 			  </tr>
 			  <?php
 			  	}
 				}else{
 					?>
-						<h1>Congratulations ! No due is left to be paid !</h1>
+						<h1>Congratulations ! No pending payments to review !</h1>
 					<?php
 				}
 			?>
