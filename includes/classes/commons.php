@@ -1,140 +1,145 @@
 <?php
 
-	/**
-	 * Class of common functions
-	 */
-	class Commons
-	{
+/**
+ * Class of common functions
+ */
+class Commons
+{
+    private $dbh = null;
+    
+    public function __construct($db)
+    {
+        $this->dbh = $db;
+    }
 
-		private $dbh = null;
-		public function __construct($db)
-		{
-			$this->dbh = $db;
-		}
+    /**
+     * Check user_name
+     */
+    public function isAvailableuser_name($user_name)
+    {
+        $request = $this->dbh->prepare("SELECT user_name FROM kp_user WHERE user_name = ?");
+        return $request->execute(array($user_name));
+    }
 
+    /*
+     * Check if a field is empty or not
+     */
+    public function isFieldEmpty($field)
+    {
+        if (isset($field) && (empty($field) || trim($field) == '')) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-	    /**
-	     * Check user_name
-	     */
-	    public function isAvailableuser_name($user_name)
-	    {
-	        $request = $this->dbh->prepare("SELECT user_name FROM kp_user WHERE user_name = ?");
-	        return $request->execute( array($user_name) );
-	    }
+    /*
+     * Redirecting helper
+     */
+    public function redirectTo($url)
+    {
+        if (!headers_sent()) {
+            header('location:'.$url);
+            exit;
+        } else {
+            print '<script type="text/javascript">';
+            print 'window.location.href="'.$url.'";';
+            print '</script>';
 
+            print '<noscript>';
+            print '<meta http-equiv="refresh" content="0;url='.$url.'" />';
+            print '</noscript>';
+            exit;
+        }
+    }
+    
+    public function getBalanceSummary()
+    {
+        $summary = ['total_rows' => 0, 'total_balance' => 0];
 
-	    /*
-	     * Check if a field is empty or not
-	     */
-	    public function isFieldEmpty($field)
-	    {
-	    	if ( isset($field) && ( empty($field) || trim($field)  == '' ) )
-	    	{
-	    		return true;
-	    	}else{
-	    		return false;
-	    	}
-	    }
+        try {
+            // Count unpaid payments
+            $sql_count = "SELECT COUNT(*) AS total_rows FROM payments WHERE status = 'Unpaid'";
+            $result_count = $this->dbh->query($sql_count);
+            if ($result_count) {
+                $row_count = $result_count->fetch(PDO::FETCH_ASSOC);
+                $summary['total_rows'] = $row_count['total_rows'] ?? 0;
+            }
 
+            // Compute total unpaid balance
+            $sql_sum = "SELECT SUM(balance) AS total_balance FROM payments WHERE status = 'Unpaid'";
+            $result_sum = $this->dbh->query($sql_sum);
+            if ($result_sum) {
+                $row_sum = $result_sum->fetch(PDO::FETCH_ASSOC);
+                $summary['total_balance'] = $row_sum['total_balance'] ?? 0;
+            }
+        } catch (PDOException $e) {
+            error_log("Database error in getBalanceSummary: " . $e->getMessage());
+        }
 
+        return $summary;
+    }
+} // End of Commons class
 
-	    /*
-	     * Redirecting helper
-	     */
-	    public function redirectTo($url)
-	    {
-	    	if (!headers_sent())
-	    	{
-	    		header('location:'.$url);
-	    		exit;
-	    	}else{
-	    		print '<script type="text/javascript">';
-	            print 'window.location.href="'.$url.'";';
-	            print '</script>';
-
-	            print '<noscript>';
-	            print '<meta http-equiv="refresh" content="0;url='.$url.'" />';
-	            print '</noscript>'; exit;
-	    	}
-	    }
-		
-		public function getBalanceSummary()
-	    {
-	        $summary = ['total_rows' => 0, 'total_balance' => 0];
-
-	        $sql = "SELECT COUNT(*) AS total_rows, SUM(bill_amount) AS total_balance FROM billings";
-	        $result = $this->dbh->query($sql);
-
-	        if ($result) {
-	            $row = $result->fetch(PDO::FETCH_ASSOC);
-	            if ($row) {
-	                $summary['total_rows'] = $row['total_rows'] ?? 0;
-	                $summary['total_balance'] = $row['total_balance'] ?? 0;
-	            }
-	        }
-
-	        return $summary;
-	    }
-
-
-	}
-
-	/**
+// Rest of your global functions remain here...
+/**
  * Function to convert a number to a the string literal for the number
  */
 function getToText($num) {
-	$count = 0;
-	global $ones, $tens, $triplets;
-	$ones = array(
-	  '',
-	  ' One',
-	  ' Two',
-	  ' Three',
-	  ' Four',
-	  ' Five',
-	  ' Six',
-	  ' Seven',
-	  ' Eight',
-	  ' Nine',
-	  ' Ten',
-	  ' Eleven',
-	  ' Twelve',
-	  ' Thirteen',
-	  ' Fourteen',
-	  ' Fifteen',
-	  ' Sixteen',
-	  ' Seventeen',
-	  ' Eighteen',
-	  ' Nineteen'
-	);
-	$tens = array(
-	  '',
-	  '',
-	  ' Twenty',
-	  ' Thirty',
-	  ' Forty',
-	  ' Fifty',
-	  ' Sixty',
-	  ' Seventy',
-	  ' Eighty',
-	  ' Ninety'
-	);
+    $count = 0;
+    global $ones, $tens, $triplets;
+    $ones = array(
+      '',
+      ' One',
+      ' Two',
+      ' Three',
+      ' Four',
+      ' Five',
+      ' Six',
+      ' Seven',
+      ' Eight',
+      ' Nine',
+      ' Ten',
+      ' Eleven',
+      ' Twelve',
+      ' Thirteen',
+      ' Fourteen',
+      ' Fifteen',
+      ' Sixteen',
+      ' Seventeen',
+      ' Eighteen',
+      ' Nineteen'
+    );
+    $tens = array(
+      '',
+      '',
+      ' Twenty',
+      ' Thirty',
+      ' Forty',
+      ' Fifty',
+      ' Sixty',
+      ' Seventy',
+      ' Eighty',
+      ' Ninety'
+    );
   
-	$triplets = array(
-	  '',
-	  ' Thousand',
-	  ' Million',
-	  ' Billion',
-	  ' Trillion',
-	  ' Quadrillion',
-	  ' Quintillion',
-	  ' Sextillion',
-	  ' Septillion',
-	  ' Octillion',
-	  ' Nonillion'
-	);
-	return convertNum($num);
-  }
+    $triplets = array(
+      '',
+      ' Thousand',
+      ' Million',
+      ' Billion',
+      ' Trillion',
+      ' Quadrillion',
+      ' Quintillion',
+      ' Sextillion',
+      ' Septillion',
+      ' Octillion',
+      ' Nonillion'
+    );
+    return convertNum($num);
+}
+
+// ... rest of your global functions
   
   /**
    * Function to dislay tens and ones
