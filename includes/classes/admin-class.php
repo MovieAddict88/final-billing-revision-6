@@ -249,7 +249,7 @@ public function getEmployerMonitoringData()
                 LEFT JOIN (
                     SELECT customer_id, SUM(amount - balance) AS total_paid, SUM(balance) AS total_balance
                     FROM payments
-                    WHERE status NOT IN ('Pending', 'Rejected')
+                    WHERE status NOT IN ('Pending', 'Rejected', 'Approved')
                     GROUP BY customer_id
                 ) p ON p.customer_id = c.id
                 WHERE
@@ -301,7 +301,7 @@ public function fetchCustomersByEmployer($employer_id, $limit = 10)
                 SUM(balance) as total_balance
             FROM
                 payments
-            WHERE status NOT IN ('Pending', 'Rejected')
+            WHERE status NOT IN ('Pending', 'Rejected', 'Approved')
             GROUP BY
                 customer_id
             ) p ON c.id = p.customer_id
@@ -453,7 +453,7 @@ public function fetchCustomersByEmployerPage($employer_id, $offset = 0, $limit =
                 SUM(balance) as total_balance
             FROM
                 payments
-            WHERE status NOT IN ('Pending', 'Rejected')
+            WHERE status NOT IN ('Pending', 'Rejected', 'Approved')
             GROUP BY
                 customer_id
             ) p ON c.id = p.customer_id
@@ -635,7 +635,7 @@ public function countCustomersByEmployer($employer_id)
                 LEFT JOIN (
                     SELECT customer_id, SUM(amount - balance) AS total_paid, SUM(balance) AS total_balance
                     FROM payments
-                    WHERE status NOT IN ('Pending', 'Rejected')
+                    WHERE status NOT IN ('Pending', 'Rejected', 'Approved')
                     GROUP BY customer_id
                 ) p ON p.customer_id = c.id
                 WHERE
@@ -744,7 +744,7 @@ public function countCustomersByEmployer($employer_id)
                     SUM(balance) as total_balance
                 FROM
                     payments
-                WHERE status NOT IN ('Pending', 'Rejected')
+                WHERE status NOT IN ('Pending', 'Rejected', 'Approved')
                 GROUP BY
                     customer_id
                 ) p ON c.id = p.customer_id
@@ -1213,7 +1213,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
         LEFT JOIN kp_user u ON c.employer_id = u.user_id
         LEFT JOIN (
             SELECT customer_id, SUM(amount - balance) as total_paid, SUM(balance) as total_balance
-            FROM payments WHERE status NOT IN ('Pending', 'Rejected') GROUP BY customer_id
+            FROM payments WHERE status NOT IN ('Pending', 'Rejected', 'Approved') GROUP BY customer_id
         ) p ON c.id = p.customer_id
         LEFT JOIN
             (SELECT
@@ -1814,6 +1814,7 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
             $request->execute($params);
 
             // Create history entry
+            $original_bill->balance = $new_balance;
             $this->insertPaymentHistoryEntry($original_bill, $payment_amount, $paid_at);
 
             $this->dbh->commit();
