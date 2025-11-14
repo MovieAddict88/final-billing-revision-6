@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="time" name="payment_time" id="payment_time" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="reference_number">Discount Reference Number</label>
+                            <label for="reference_number">Discount Name</label>
                             <input type="text" name="reference_number" id="reference_number" class="form-control" required>
                         </div>
                         <button type="submit" class="btn btn-primary">Apply Discount</button>
