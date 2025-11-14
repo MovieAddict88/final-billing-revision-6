@@ -2243,4 +2243,75 @@ public function getDisconnectedCustomerInfo($id)
         $request = $this->dbh->prepare("UPDATE reconnection_requests SET status = 'rejected' WHERE id = ?");
         return $request->execute([$id]);
     }
+
+    public function processExceedingPayment($customer_id, $amount_to_use, $selected_bills)
+    {
+        if ($amount_to_use <= 0 || empty($selected_bills)) {
+            return false;
+        }
+
+        $customer = $this->getCustomerInfo($customer_id);
+        $advance_balance = $customer ? (float)$customer->advance_payment : 0;
+
+        if ($amount_to_use > $advance_balance) {
+            return false; // Not enough advance balance
+        }
+
+        try {
+            $this->dbh->beginTransaction();
+            $remaining_amount_to_use = $amount_to_use;
+            $total_used_from_advance = 0;
+
+            foreach ($selected_bills as $bill_id) {
+                if ($remaining_amount_to_use <= 0) {
+                    break;
+                }
+
+                $bill = $this->getPaymentById($bill_id);
+                if (!$bill) {
+                    continue;
+                }
+
+                $due_amount = ($bill->balance > 0) ? (float)$bill->balance : (float)$bill->amount;
+                $payment_for_this_bill = min($remaining_amount_to_use, $due_amount);
+
+                if ($payment_for_this_bill > 0) {
+                    $new_balance = $due_amount - $payment_for_this_bill;
+                    $new_status = ($new_balance <= 0) ? 'Paid' : 'Balance';
+
+                    $update_request = $this->dbh->prepare("UPDATE payments SET balance = ?, status = ? WHERE id = ?");
+                    $update_request->execute([$new_balance, $new_status, $bill->id]);
+
+                    $total_used_from_advance += $payment_for_this_bill;
+
+                    $payment = (object)[
+                        'id' => $bill->id,
+                        'customer_id' => $customer_id,
+                        'package_id' => $bill->package_id,
+                        'r_month' => $bill->r_month,
+                        'amount' => $bill->amount,
+                        'balance' => $new_balance,
+                        'payment_method' => 'Exceeded Payment Use',
+                        'reference_number' => 'Deducted from Exceed Payment',
+                        'employer_id' => $customer->employer_id,
+                        'payment_timestamp' => date('Y-m-d H:i:s')
+                    ];
+                    $this->insertPaymentHistoryEntry($payment, $payment_for_this_bill);
+
+                    $remaining_amount_to_use -= $payment_for_this_bill;
+                }
+            }
+
+            if ($total_used_from_advance > 0) {
+                $this->useAdvancePayment($customer_id, $total_used_from_advance);
+            }
+
+            $this->dbh->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->dbh->rollBack();
+            error_log("processExceedingPayment error: " . $e->getMessage());
+            return false;
+        }
+    }
 }
