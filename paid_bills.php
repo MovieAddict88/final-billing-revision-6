@@ -62,7 +62,7 @@
                                     $total_balance += (float)$payment->balance;
                                 }
                             }
-                            if (isset($bills) && sizeof($bills) > 0 && !empty($bills)){
+                            if (isset($bills) && !empty($bills)){
                             ?>
                             <tr>
                                 <td><?=$customer_id?></td>
