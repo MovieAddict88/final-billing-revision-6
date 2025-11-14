@@ -23,16 +23,10 @@ $advance_balance = $admins->getAdvancePaymentBalance($customer_id);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $employer_id = $_SESSION['user_id'];
-    $amount = $_POST['amount'];
-    $reference_number = $_POST['reference_number'];
-    $payment_method = $_POST['payment_method'];
-    $screenshot = isset($_FILES['screenshot']) ? $_FILES['screenshot'] : null;
     $selected_bills = isset($_POST['bills']) ? $_POST['bills'] : [];
-    $payment_date = $_POST['payment_date'];
-    $payment_time = $_POST['payment_time'];
-    $r_months = isset($_POST['r_month']) ? $_POST['r_month'] : [];
 
     if (isset($_POST['apply_advance_payment'])) {
+        // Handle advance payment form submission
         $amount_to_use = isset($_POST['use_advance_payment']) ? (float)$_POST['use_advance_payment'] : 0;
         if ($amount_to_use > 0 && !empty($selected_bills)) {
             if ($admins->processExceedingPayment($customer_id, $amount_to_use, $selected_bills)) {
@@ -44,15 +38,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $error_message = "Please enter an amount and select at least one bill to apply the advance payment to.";
         }
-    } elseif (!empty($selected_bills)) {
-        if ($admins->processManualPayment($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_method, $screenshot, $payment_date, $payment_time, $r_months)) {
-            echo "<script>alert('Payment submitted successfully and is pending approval.'); window.location.href = 'index.php';</script>";
-            exit();
-        } else {
-            $error_message = "Failed to process payment. Please try again.";
-        }
     } else {
-        $error_message = "Please select at least one bill to pay.";
+        // Handle manual payment form submission
+        $amount = $_POST['amount'];
+        $reference_number = $_POST['reference_number'];
+        $payment_method = $_POST['payment_method'];
+        $screenshot = isset($_FILES['screenshot']) ? $_FILES['screenshot'] : null;
+        $payment_date = $_POST['payment_date'];
+        $payment_time = $_POST['payment_time'];
+        $r_months = isset($_POST['r_month']) ? $_POST['r_month'] : [];
+
+        if (!empty($selected_bills)) {
+            if ($admins->processManualPayment($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_method, $screenshot, $payment_date, $payment_time, $r_months)) {
+                echo "<script>alert('Payment submitted successfully and is pending approval.'); window.location.href = 'index.php';</script>";
+                exit();
+            } else {
+                $error_message = "Failed to process payment. Please try again.";
+            }
+        } else {
+            $error_message = "Please select at least one bill to pay.";
+        }
     }
 }
 ?>
