@@ -62,20 +62,15 @@
 	    {
 	        $summary = ['total_rows' => 0, 'total_balance' => 0];
 
-	        // Count how many rows
-	        $sql_count = "SELECT COUNT(*) AS total_rows FROM bills";
-	        $result_count = $this->dbh->query($sql_count);
-	        if ($result_count) {
-	            $row_count = $result_count->fetch(PDO::FETCH_ASSOC);
-	            $summary['total_rows'] = $row_count['total_rows'] ?? 0;
-	        }
+	        $sql = "SELECT COUNT(*) AS total_rows, SUM(bill_amount) AS total_balance FROM billings";
+	        $result = $this->dbh->query($sql);
 
-	        // Compute total balance
-	        $sql_sum = "SELECT SUM(amount) AS total_balance FROM bills";
-	        $result_sum = $this->dbh->query($sql_sum);
-	        if ($result_sum) {
-	            $row_sum = $result_sum->fetch(PDO::FETCH_ASSOC);
-	            $summary['total_balance'] = $row_sum['total_balance'] ?? 0;
+	        if ($result) {
+	            $row = $result->fetch(PDO::FETCH_ASSOC);
+	            if ($row) {
+	                $summary['total_rows'] = $row['total_rows'] ?? 0;
+	                $summary['total_balance'] = $row['total_balance'] ?? 0;
+	            }
 	        }
 
 	        return $summary;
