@@ -30,9 +30,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $selected_bills = isset($_POST['bills']) ? $_POST['bills'] : [];
     $payment_date = $_POST['payment_date'];
     $payment_time = $_POST['payment_time'];
+    $r_months = isset($_POST['r_month']) ? $_POST['r_month'] : [];
 
     if (!empty($selected_bills)) {
-        if ($admins->processManualPayment($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_method, $screenshot, $payment_date, $payment_time)) {
+        if ($admins->processManualPayment($customer_id, $employer_id, $amount, $reference_number, $selected_bills, $payment_method, $screenshot, $payment_date, $payment_time, $r_months)) {
             echo "<script>alert('Payment submitted successfully and is pending approval.'); window.location.href = 'index.php';</script>";
             exit();
         } else {
@@ -91,7 +92,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         <td>
                                             <input type="checkbox" name="bills[]" value="<?php echo $bill->id; ?>" data-balance="<?php echo htmlspecialchars(number_format($due_amount, 2, '.', '')); ?>" <?php echo $is_pending ? 'disabled' : ''; ?>>
                                         </td>
-                                        <td><?php echo htmlspecialchars($bill->r_month); ?><?php if ($is_pending): ?> <span class="badge badge-warning">Pending approval</span><?php endif; ?></td>
+                                        <td>
+                                            <input type="text" class="form-control" name="r_month[<?php echo $bill->id; ?>]" value="<?php echo htmlspecialchars($bill->r_month); ?>">
+                                            <?php if ($is_pending): ?> <span class="badge badge-warning">Pending approval</span><?php endif; ?>
+                                        </td>
                                         <td><?php echo htmlspecialchars(number_format((float)$bill->amount, 2)); ?></td>
                                         <td><?php echo htmlspecialchars(number_format($due_amount, 2)); ?></td>
                                     </tr>
