@@ -413,37 +413,6 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'pay';
                     <p class="highlight"><strong>Account No. : <?= htmlspecialchars($info->account_number) ?></strong></p>
                 </div>
 
-                <?php if ($action != 'bill' && (isset($total_due) && $total_due > 0)) : ?>
-                    <div class="row no-print">
-                        <form class="form-inline" action="post_approve.php" method="POST">
-                            <input type="hidden" name="customer" value="<?= (isset($info->id) ? htmlspecialchars($info->id) : '') ?>">
-                            <input type="hidden" name="bills" value="<?= htmlspecialchars(implode(',', array_map(function ($bill) {
-                                                                        return $bill->id;
-                                                                    }, $unpaid_bills))) ?>">
-                            <div class="form-group">
-                                <label for="months"></label>
-                                <select class="selectpicker" name="months[]" id="months" multiple required title="Select months">
-                                    <?php
-                                    if (!empty($unpaid_bills)) {
-                                        foreach ($unpaid_bills as $bill) {
-                                            echo '<option value="' . htmlspecialchars($bill->r_month) . '" selected>' . htmlspecialchars($bill->r_month) . '</option>';
-                                        }
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="sr-only" for="discount">Discount</label>
-                                <input type="number" class="form-control" name="discount" id="discount" placeholder="Discount">
-                            </div>
-                            <div class="form-group">
-                                <label class="sr-only" for="total">Payment</label>
-                                <input type="number" class="form-control disabled" name="total" id="total" placeholder="total" required="" value="<?= htmlspecialchars($total_due) ?>">
-                            </div>
-                            <button type="submit" class="btn btn-primary">Paid</button>
-                        </form>
-                    </div>
-                <?php endif; ?>
             <?php endif; ?>
 
 
