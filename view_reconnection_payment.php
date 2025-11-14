@@ -22,7 +22,7 @@ $customer = $admins->getDisconnectedCustomerInfo($payment->customer_id);
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['approve'])) {
         if ($admins->approveReconnectionPayment($request_id)) {
-            echo "<script>window.opener.location.reload(); window.close();</script>";
+            echo "<script>window.opener.location.href = 'customers.php'; window.close();</script>";
             exit();
         } else {
             $error_message = "Failed to approve payment.";

@@ -755,14 +755,10 @@ public function countCustomersByEmployer($employer_id)
     /**
      * Update Customers
      */
-    public function updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date, $exceeding_payment = 0)
+    public function updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date)
     {
         $request = $this->dbh->prepare("UPDATE customers SET full_name =?, nid =?, account_number =?, address =?, conn_location= ?, email =?, package_id =?, ip_address=?, conn_type=?, contact=?, employer_id = ?, start_date = ?, due_date = ?, end_date = ? WHERE id =?");
         $result = $request->execute([$full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date, $id]);
-
-        if ($result && $exceeding_payment > 0) {
-            $this->applyExceedingPaymentToBill($id, $exceeding_payment);
-        }
 
         return $result;
     }

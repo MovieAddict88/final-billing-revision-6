@@ -22,6 +22,6 @@ if (isset($_GET['id'])) {
     $_SESSION['errors'] = ['Invalid request.'];
 }
 
-header('Location: reconnection_requests.php');
+header('Location: customers.php');
 exit();
 ?>
