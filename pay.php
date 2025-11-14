@@ -182,6 +182,9 @@ $action = isset($_GET['action']) ? $_GET['action'] : 'pay';
             background-color: #284390 !important;
             color: white !important;
         }
+        .blue-bg strong, .blue-bg b {
+            color: white !important;
+        }
 
         .highlight {
             -webkit-print-color-adjust: exact !important;
