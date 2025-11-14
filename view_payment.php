@@ -83,10 +83,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <table class="table table-striped">
                         <thead>
                             <tr>
-                                <th>Month</th>
-                                <th>Bill Amount</th>
-                                <th>Current Balance</th>
-                                <th>Amount to be Paid</th>
+                                <th style="background-color: #284390; color: white;">Month</th>
+                                <th style="background-color: #284390; color: white;">Bill Amount</th>
+                                <th style="background-color: #284390; color: white;">Current Balance</th>
+                                <th style="background-color: #284390; color: white;">Amount to be Paid</th>
                             </tr>
                         </thead>
                         <tbody>

@@ -73,12 +73,12 @@
 				<table id="grid-basic" class="table table-striped table-bordered">
 						<thead class="thead-inverse">
 							<tr class="info">
-								<th>ID </th>
-								<th>Date</th>
-								<th>Amount</th>
-								<th>From</th>
-								<th>Remarks</th>
-								<th>Action</th>
+								<th style="background-color: #284390; color: white;">ID </th>
+								<th style="background-color: #284390; color: white;">Date</th>
+								<th style="background-color: #284390; color: white;">Amount</th>
+								<th style="background-color: #284390; color: white;">From</th>
+								<th style="background-color: #284390; color: white;">Remarks</th>
+								<th style="background-color: #284390; color: white;">Action</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -151,12 +151,12 @@
 			<table id="grid-basic" class="table table-striped table-bordered" id="grid-basic">
 					<thead class="thead-inverse">
 						<tr class="info">
-							<th>ID </th>
-							<th>Date</th>
-							<th>Amount</th>
-							<th>Purpose</th>
-							<th>Remarks</th>
-							<th>Action</th>
+							<th style="background-color: #284390; color: white;">ID </th>
+							<th style="background-color: #284390; color: white;">Date</th>
+							<th style="background-color: #284390; color: white;">Amount</th>
+							<th style="background-color: #284390; color: white;">Purpose</th>
+							<th style="background-color: #284390; color: white;">Remarks</th>
+							<th style="background-color: #284390; color: white;">Action</th>
 						</tr>
 					</thead>
 					<tbody>

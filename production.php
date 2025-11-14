@@ -73,13 +73,13 @@
 				<table id="grid-basic" class="table table-striped table-bordered">
 						<thead class="thead-inverse">
 							<tr class="info">
-								<th data-column-id="id" data-type="numeric">ID </th>
-								<th data-column-id="date" data-type="date">Date</th>
-								<th data-column-id="name" data-type="text">Product Name</th>
-								<th data-column-id="production" data-type="numeric">Quantity</th>
-								<th data-column-id="finished" data-type="text">Provider</th>
-								<th data-column-id="unfinished" data-type="text">Remarks</th>
-								<th data-column-id="commands" data-formatter="commands" data-sortable="false">Action</th>
+								<th style="background-color: #284390; color: white;" data-column-id="id" data-type="numeric">ID </th>
+								<th style="background-color: #284390; color: white;" data-column-id="date" data-type="date">Date</th>
+								<th style="background-color: #284390; color: white;" data-column-id="name" data-type="text">Product Name</th>
+								<th style="background-color: #284390; color: white;" data-column-id="production" data-type="numeric">Quantity</th>
+								<th style="background-color: #284390; color: white;" data-column-id="finished" data-type="text">Provider</th>
+								<th style="background-color: #284390; color: white;" data-column-id="unfinished" data-type="text">Remarks</th>
+								<th style="background-color: #284390; color: white;" data-column-id="commands" data-formatter="commands" data-sortable="false">Action</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -156,13 +156,13 @@
 				<table id="grid-basic" class="table table-striped table-bordered">
 						<thead class="thead-inverse">
 							<tr class="info">
-								<th data-column-id="id" data-type="numeric">ID </th>
-								<th data-column-id="date" data-type="date">Date</th>
-								<th data-column-id="name" data-type="text">Product Name</th>
-								<th data-column-id="production" data-type="numeric">Quantity</th>
-								<th data-column-id="unfinished" data-type="text">Recipient</th>
-								<th data-column-id="unfinished" data-type="text">Remarks</th>
-								<th data-column-id="commands" data-formatter="commands" data-sortable="false">Action</th>
+								<th style="background-color: #284390; color: white;" data-column-id="id" data-type="numeric">ID </th>
+								<th style="background-color: #284390; color: white;" data-column-id="date" data-type="date">Date</th>
+								<th style="background-color: #284390; color: white;" data-column-id="name" data-type="text">Product Name</th>
+								<th style="background-color: #284390; color: white;" data-column-id="production" data-type="numeric">Quantity</th>
+								<th style="background-color: #284390; color: white;" data-column-id="unfinished" data-type="text">Recipient</th>
+								<th style="background-color: #284390; color: white;" data-column-id="unfinished" data-type="text">Remarks</th>
+								<th style="background-color: #284390; color: white;" data-column-id="commands" data-formatter="commands" data-sortable="false">Action</th>
 							</tr>
 						</thead>
 						<tbody>

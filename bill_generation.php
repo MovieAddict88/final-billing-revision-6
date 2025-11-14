@@ -30,13 +30,13 @@
 		<table class="table table-striped table-bordered">
 				<thead class="thead-inverse">
 				  <tr>
-				    <th>ID </th>
-				    <th>Name</th>
-				    <th>Months</th>
-				    <th>Package</th>
-				    <th>Amounts</th>
-				    <th>Due Date</th>
-				    <th>Delete</th>
+				    <th style="background-color: #284390; color: white;">ID </th>
+				    <th style="background-color: #284390; color: white;">Name</th>
+				    <th style="background-color: #284390; color: white;">Months</th>
+				    <th style="background-color: #284390; color: white;">Package</th>
+				    <th style="background-color: #284390; color: white;">Amounts</th>
+				    <th style="background-color: #284390; color: white;">Due Date</th>
+				    <th style="background-color: #284390; color: white;">Delete</th>
 				  </tr>
 				</thead>
 			  <tbody>
