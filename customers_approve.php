@@ -52,13 +52,14 @@
 			}
 	}else if($page == 'del'){
 		$id = $_POST['id'];
+		header('Content-Type: application/json');
 		if (!$admins->deletecustomer($id)) 
 		{
-			echo "Sorry Data could not be deleted !";
+			echo json_encode(['success' => false, 'message' => 'Sorry, data could not be deleted.']);
 		}else {
-			echo "Well! You've successfully deleted a product!";
+			echo json_encode(['success' => true, 'message' => 'Well! You\'ve successfully deleted a customer!']);
 		}
-
+		exit;
 	}else if($page == 'edit'){
 		$id = $_POST['id'];
 		$full_name = $_POST['full_name'];

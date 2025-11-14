@@ -1181,6 +1181,9 @@ public function deleteCustomer($id)
         $this->dbh->beginTransaction();
 
         // Then delete from main tables
+        $request = $this->dbh->prepare("DELETE FROM payment_history WHERE customer_id = ?");
+        $request->execute([$id]);
+
         $request = $this->dbh->prepare("DELETE FROM payments WHERE customer_id = ?");
         $request->execute([$id]);
 
