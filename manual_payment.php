@@ -119,7 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     ?>
                                     <tr>
                                         <td>
-                                            <input type="checkbox" name="bills[]" value="<?php echo $bill->id; ?>" data-balance="<?php echo htmlspecialchars(number_format($due_amount, 2, '.', '')); ?>" <?php echo $is_pending ? 'disabled' : ''; ?>>
+                                            <input type="checkbox" name="bills[]" value="<?php echo $bill->id; ?>" data-balance="<?php echo htmlspecialchars(number_format($due_amount, 2, '.', '')); ?>">
                                         </td>
                                         <td>
                                             <input type="text" class="form-control" name="r_month[<?php echo $bill->id; ?>]" value="<?php echo htmlspecialchars($bill->r_month); ?>">
