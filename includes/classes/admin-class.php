@@ -2419,4 +2419,57 @@ public function getDisconnectedCustomerInfo($id)
             'year' => $current_year,
         ];
     }
+
+    public function getDailyChartData()
+    {
+        $labels = [];
+        $cash_collection_data = [];
+        $balance_data = [];
+        $start_date = date('Y-m-d', strtotime('-6 days'));
+
+        // Initialize arrays with default zero values
+        for ($i = 6; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-$i days"));
+            $day_label = date('D', strtotime($date));
+            $labels[] = $day_label;
+            $cash_collection_data[$date] = 0;
+            $balance_data[$date] = 0;
+        }
+
+        // Fetch cash collection data for the last 7 days in one query
+        $cash_sql = "
+            SELECT DATE(paid_at) as p_date, COALESCE(SUM(paid_amount), 0) as total
+            FROM payment_history
+            WHERE DATE(paid_at) >= :start_date AND payment_method != 'Discount'
+            GROUP BY DATE(paid_at)
+        ";
+        $cash_req = $this->dbh->prepare($cash_sql);
+        $cash_req->execute(['start_date' => $start_date]);
+        $cash_results = $cash_req->fetchAll();
+
+        foreach ($cash_results as $row) {
+            $cash_collection_data[$row->p_date] = (float)$row->total;
+        }
+
+        // Fetch balance data for the last 7 days in one query
+        $balance_sql = "
+            SELECT DATE(g_date) as g_date, COALESCE(SUM(balance), 0) as total
+            FROM payments
+            WHERE DATE(g_date) >= :start_date AND status IN ('Unpaid', 'Balance')
+            GROUP BY DATE(g_date)
+        ";
+        $balance_req = $this->dbh->prepare($balance_sql);
+        $balance_req->execute(['start_date' => $start_date]);
+        $balance_results = $balance_req->fetchAll();
+
+        foreach ($balance_results as $row) {
+            $balance_data[$row->g_date] = (float)$row->total;
+        }
+
+        return [
+            'labels' => $labels,
+            'cash_collection' => array_values($cash_collection_data),
+            'balance' => array_values($balance_data),
+        ];
+    }
 }

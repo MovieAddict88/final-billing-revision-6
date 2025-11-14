@@ -719,6 +719,7 @@ if ($user_role == 'employer') {
 } else {
     // Admin Dashboard
     $monthly_collection_data = $admins->getMonthlyBillCollection();
+    $daily_chart_data = $admins->getDailyChartData();
 ?>
 <!-- Admin dashboard code remains the same -->
 <style>
@@ -908,18 +909,19 @@ function updateData(str){
         });
         <?php else: ?>
         // Admin dashboard JavaScript
+        var dailyChartData = <?php echo json_encode($daily_chart_data); ?>;
         var ctx1 = document.getElementById('myChart').getContext('2d');
         var myChart1 = new Chart(ctx1, {
             type: 'bar',
             data: {
-                labels: ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                labels: dailyChartData.labels,
                 datasets: [{
                     label: 'Cash Collection',
-                    data: [12, 19, 3, 17, 6, 3, 20],
+                    data: dailyChartData.cash_collection,
                     backgroundColor: "rgba(153,255,51,0.6)"
                 }, {
                     label: 'Balance',
-                    data: [2, 29, 5, 5, 2, 3, 10],
+                    data: dailyChartData.balance,
                     backgroundColor: "rgba(245,0,0,0.6)"
                 }]
             }
