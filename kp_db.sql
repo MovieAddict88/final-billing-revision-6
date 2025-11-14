@@ -591,6 +591,61 @@ ALTER TABLE `product`
 --
 ALTER TABLE `reconnection_requests`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
+
+--
+-- Table structure for table `payment_submissions`
+--
+CREATE TABLE `payment_submissions` (
+  `id` int(11) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `employer_id` int(11) DEFAULT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) DEFAULT NULL,
+  `reference_number` varchar(255) DEFAULT NULL,
+  `screenshot` varchar(255) DEFAULT NULL,
+  `payment_date` timestamp NULL DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Indexes for table `payment_submissions`
+--
+ALTER TABLE `payment_submissions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `status` (`status`);
+
+--
+-- AUTO_INCREMENT for table `payment_submissions`
+--
+ALTER TABLE `payment_submissions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Table structure for table `payment_submission_items`
+--
+CREATE TABLE `payment_submission_items` (
+  `id` int(11) NOT NULL,
+  `submission_id` int(11) NOT NULL,
+  `payment_id` int(11) NOT NULL,
+  `amount_paid` decimal(10,2) NOT NULL,
+  `r_month` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Indexes for table `payment_submission_items`
+--
+ALTER TABLE `payment_submission_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `submission_id` (`submission_id`),
+  ADD KEY `payment_id` (`payment_id`);
+
+--
+-- AUTO_INCREMENT for table `payment_submission_items`
+--
+ALTER TABLE `payment_submission_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
