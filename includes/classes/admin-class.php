@@ -1869,7 +1869,9 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                     "SELECT COUNT(*) as count FROM payment_submission_items si JOIN payment_submissions s ON si.submission_id = s.id WHERE si.payment_id = ? AND s.status = 'pending' AND si.submission_id != ?"
                 );
                 $other_pending_request->execute([$item->payment_id, $submission_id]);
-                $other_pending_count = $other_pending_request->fetch()->count;
+                $result = $other_pending_request->fetch();
+                $other_pending_count = $result ? $result->count : 0;
+                $other_pending_request->closeCursor();
 
                 // If no other pending submissions, revert the bill's status from 'Pending' to 'Unpaid' or 'Balance'
                 if ($other_pending_count == 0) {
