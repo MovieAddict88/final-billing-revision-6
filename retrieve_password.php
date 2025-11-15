@@ -14,8 +14,12 @@
     <title>CS-BILLING | Retrieve Password</title>
 </head>
 <body>
-
-	<div class="container" style="margin-top: 50px;">
+    <?php
+    if (isset($_SESSION['user_id']) || isset($_SESSION['admin_session'])) {
+        include "includes/header.php";
+    }
+    ?>
+	<div class="container" style="margin-top: 100px;">
 		<div class="row">
 			<div class="col-md-12">
 				<div class="panel panel-default">
@@ -23,6 +27,17 @@
 						<h4>Retrieve Password</h4>
 					</div>
 					<div class="panel-body">
+						<div class="row">
+							<div class="col-md-12">
+								<form class="form-inline" id="search-form">
+									<div class="form-group">
+										<input type="text" class="form-control" id="search-query" placeholder="Search">
+									</div>
+									<button type="submit" class="btn btn-primary">Search</button>
+								</form>
+							</div>
+						</div>
+						<br>
 						<div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
 							<table class="table table-striped table-bordered" id="grid-basic" style="min-width: 1200px; width: 100%;">
 								<thead class="thead-inverse">
@@ -58,6 +73,14 @@
         });
     }
     window.onload = function(){ viewData(); };
+
+	$(document).ready(function(){
+		$('#search-form').submit(function(e){
+			e.preventDefault();
+			var q = $('#search-query').val();
+			viewData(1, q);
+		});
+	});
 
     function retrievePassword(user_id){
 	var admin_username = '';
