@@ -13,6 +13,15 @@ class Admins
         $this->dbh = $db;
     }
 
+    public function isRetrieveCodeValid($retrieve_code)
+    {
+        $request = $this->dbh->prepare("SELECT user_id FROM kp_user WHERE retrieve_code = ?");
+        if ($request->execute([$retrieve_code])) {
+            return $request->fetch() !== false;
+        }
+        return false;
+    }
+
     public function loginAdmin($user_name, $user_pwd)
     {
         //Un-comment this to see a cryptogram of a user_pwd 
