@@ -119,6 +119,10 @@
 					        <label for="location">Account Manager Location</label>
 					        <input type="text" class="form-control" id="location" name="location" placeholder="Enter location">
 					      </div>
+					      <div class="form-group" id="retrieve-code-group">
+					        <label for="retrieve_code">6-Digit Retrieve Code</label>
+					        <input type="text" class="form-control" id="retrieve_code" name="retrieve_code" placeholder="Enter 6-digit code" maxlength="6">
+					      </div>
 						  <div class="form-group">
 							<label for="profile_pic">Profile Picture</label>
 							<input type="file" class="form-control" id="profile_pic" name="profile_pic">
@@ -138,13 +142,19 @@
 	?>
 	<script type="text/javascript">
 	$(document).ready(function(){
-		$('#role').on('change', function(){
-			if($(this).val() == 'employer'){
+		function toggleRoleFields() {
+			if($('#role').val() == 'employer'){
 				$('#location-group').show();
+				$('#retrieve-code-group').hide();
 			} else {
 				$('#location-group').hide();
+				$('#retrieve-code-group').show();
 			}
-		});
+		}
+
+		toggleRoleFields(); // Call on page load
+
+		$('#role').on('change', toggleRoleFields);
 	});
 
 	$('#insert_form').on('submit',function(event){
@@ -211,6 +221,21 @@
 		});
 	}
     window.onload = function(){ viewData(); };
+
+    function changePassword(user_id, event){
+	event.preventDefault();
+	var new_password = $('#new_password-'+user_id).val();
+	var confirm_password = $('#confirm_password-'+user_id).val();
+	$.ajax({
+		method: "POST",
+		url: "user_approve.php?p=change_password",
+		data: {user_id: user_id, new_password: new_password, confirm_password: confirm_password},
+		success: function(data){
+			alert(data);
+			$('#change-password-'+user_id).modal('hide');
+		}
+	});
+    }
 	</script>
 	<script type="text/javascript">
 	  $(function() {

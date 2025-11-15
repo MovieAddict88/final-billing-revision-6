@@ -143,6 +143,9 @@
 				<li class="users">
 					<a href="user.php">Users</a>
 				</li>
+				<li class="users">
+					<a href="retrieve_password.php">Retrieve Password</a>
+				</li>
 				<li class="monitoring">
 					<a href="employee_monitoring.php">Account Manager</a>
 				</li>

@@ -270,7 +270,8 @@ CREATE TABLE `kp_user` (
   `authentication` int(1) NOT NULL DEFAULT 0,
   `role` varchar(255) NOT NULL DEFAULT 'admin',
   `location` varchar(255) DEFAULT NULL,
-  `profile_pic` varchar(255) DEFAULT NULL
+  `profile_pic` varchar(255) DEFAULT NULL,
+  `retrieve_code` varchar(6) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
 
 --

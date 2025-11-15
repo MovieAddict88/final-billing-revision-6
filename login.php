@@ -41,6 +41,7 @@
 	  			<input type="text" name="username" id="username" class="form-control" placeholder="username" required autofocus>	  		
 	  			<input type="password" name="password" id="password" class="form-control" placeholder="password" required>
 	  			<button type="submit" class="btn btn-default">Log in</button>
+				<a href="retrieve_password.php">Retrieve Password</a>
 	  </form>
 </div>
 <?php include 'includes/footer.php'; ?>

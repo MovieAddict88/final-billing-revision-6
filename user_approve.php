@@ -23,6 +23,7 @@
 			$contact = $_POST['contact'];
 			$role = $_POST['role'];
 			$location = isset($_POST['location']) ? $_POST['location'] : null;
+			$retrieve_code = isset($_POST['retrieve_code']) ? $_POST['retrieve_code'] : null;
 			$profile_pic = null;
 
 			if (isset($_FILES['profile_pic']) && $_FILES['profile_pic']['error'] == UPLOAD_ERR_OK) {
@@ -59,7 +60,7 @@
 			}elseif ($admins->adminExists($_POST['username'])) {
 				$response['status'] = 'error';
 				$response['message'] = 'This username is already in use by another admin.';
-			}elseif (!$admins->addNewAdmin($username, $password, $email, $fullname, $address, $contact, $role, $location, $profile_pic)) {
+			}elseif (!$admins->addNewAdmin($username, $password, $email, $fullname, $address, $contact, $role, $location, $profile_pic, $retrieve_code)) {
 				$response['status'] = 'error';
 				$response['message'] = 'An error occured while saving the new admin.';
 			}else{
@@ -101,6 +102,48 @@
 			$commons->redirectTo(SITE_PATH.'user.php');
 		}
 
+	}else if($page == 'retrieve_password'){
+		$user_id = $_POST['user_id'];
+		$retrieve_code = $_POST['retrieve_code'];
+		$admin_username = $_POST['admin_username'];
+		$admin_id = null;
+		$admin_details = null;
+
+		if (isset($_SESSION['admin_session'])) {
+			$admin_id = $_SESSION['user_id'];
+			$admin_details = $admins->getUserDetailsForPasswordRetrieval($admin_id);
+		} else {
+			$admin_user = $admins->getUserByUsername($admin_username);
+			if ($admin_user) {
+				$admin_id = $admin_user->user_id;
+				$admin_details = $admins->getUserDetailsForPasswordRetrieval($admin_id);
+			}
+		}
+
+		if($admin_details && $admin_details->retrieve_code == $retrieve_code){
+			$new_password = $admins->resetUserPassword($user_id);
+			if($new_password){
+				echo "Password has been reset. The new temporary password is: " . $new_password;
+			}else{
+				echo "An error occurred while resetting the password.";
+			}
+		}else{
+			echo "Invalid retrieve code or admin username.";
+		}
+	}else if($page == 'change_password'){
+		$user_id = $_POST['user_id'];
+		$new_password = $_POST['new_password'];
+		$confirm_password = $_POST['confirm_password'];
+
+		if($new_password != $confirm_password){
+			echo "Passwords do not match.";
+		}else{
+			if($admins->changeUserPassword($user_id, $new_password)){
+				echo "Password changed successfully.";
+			}else{
+				echo "An error occurred while changing the password.";
+			}
+		}
     }else{
         // Pagination and search
         $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
@@ -111,6 +154,19 @@
         $total = $admins->countAdmin($q);
         $totalPages = ($limit > 0) ? (int)ceil($total / $limit) : 1;
         if (isset($users) && sizeof($users) > 0) {
+		if(isset($_GET['view']) && $_GET['view'] == 'retrieve_password'){
+			foreach ($users as $user){ ?>
+					<tr>
+						<td class="search"><?=$user->full_name?></td>
+						<td class="search"><?=$user->email?></td>
+						<td class="search"><?=$user->user_name?></td>
+						<td class="search"><?=$user->contact?></td>
+						<td>
+							<button type="button" class="btn btn-info btn-sm" onclick="retrievePassword(<?=$user->user_id?>)">Retrieve Password</button>
+						</td>
+					</tr>
+			<?php }
+		}else{
             foreach ($users as $user){ ?>
 				<tr>
 					<td scope="row"><?=$user->user_id ?></td>
@@ -158,6 +214,33 @@
 								</div>
 							</div>
 						</div>
+						<button type="button" id="change_password" class="btn btn-primary btn-sm btn-action" data-toggle="modal" data-target="#change-password-<?=$user->user_id?>">Change Password</button>
+						<div class="fade modal" id="change-password-<?=$user->user_id?>">
+							<div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<button type="button" class="close" data-dismiss="modal">×</button>
+										<h4>Change Password</h4>
+									</div>
+									<form onsubmit="changePassword(<?=$user->user_id?>, event)">
+										<div class="modal-body">
+											<div class="form-group">
+												<label for="new_password">New Password</label>
+												<input type="password" class="form-control" id="new_password-<?=$user->user_id?>" required>
+											</div>
+											<div class="form-group">
+												<label for="confirm_password">Confirm Password</label>
+												<input type="password" class="form-control" id="confirm_password-<?=$user->user_id?>" required>
+											</div>
+										</div>
+										<div class="modal-footer">
+											<button type="submit" class="btn btn-primary">Submit</button>
+											<a href="#" class="btn btn-warning" data-dismiss="modal">Cancel</a>
+										</div>
+									</form>
+								</div>
+							</div>
+						</div>
 						<button type="submit" id="delete" onclick="delData(<?=$user->user_id ?>)" class="btn btn-warning btn-sm btn-action">DELETE</button>
 					</td>
 					<td class="search"><?=$user->user_name?></td>
@@ -168,6 +251,7 @@
 				</tr>
             <?php
             }
+        }
             $prevDisabled = ($page <= 1) ? 'disabled' : '';
             $nextDisabled = ($page >= $totalPages) ? 'disabled' : '';
             ?>
