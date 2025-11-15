@@ -14,13 +14,13 @@ $user_role = $_SESSION['user_role'];
 $is_admin = ($user_role == 'admin');
 ?>
 
-<div class="dashboard">
+<div class="dashboard" style="margin-top: 50px;">
     <div class="col-md-12 col-sm-12" id="employee_table">
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Disconnected Clients</h4>
                 <div class="pull-right">
-                    <a href="customers.php" class="btn btn-primary">Back to Active Customers</a>
+                    <a href="customers.php" style="margin-top: 20px;" class="btn btn-primary">Back to Active Customers</a>
                 </div>
             </div>
             <div class="panel-body">
@@ -56,7 +56,7 @@ $is_admin = ($user_role == 'admin');
                     </div>
                 <?php endif; ?>
             </div>
-            <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+            <div class="table-responsive" style="overflow-x: auto; margin-top: 50px;  -webkit-overflow-scrolling: touch;">
                 <table class="table table-striped table-bordered" id="grid-basic" style="min-width: 1200px; width: 100%;">
                     <thead class="thead-inverse">
                         <tr class="info">
