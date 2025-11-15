@@ -76,7 +76,6 @@ $admins = new Admins($dbh);
                             <th style="min-width: 120px; background-color: #284390; color: white;">Exceeding Payment</th>
                             <th style="min-width: 150px; background-color: #284390; color: white;">Login Code</th>
                             <th style="min-width: 120px; background-color: #284390; color: white;">Start Date</th>
-                            <th style="min-width: 120px; background-color: #284390; color: white;">End Date</th>
                             <th style="min-width: 120px; background-color: #284390; color: white;">Due Date</th>
                             <th style="min-width: 200px; background-color: #284390; color: white;">Remarks</th>
                         </tr>
@@ -164,10 +163,6 @@ $admins = new Admins($dbh);
                         <input type="date" class="form-control" id="start_date" name="start_date" placeholder="Start Date" required>
                     </div>
                     <div class="form-group">
-                        <label for="end_date">End Date</label>
-                        <input type="date" class="form-control" id="end_date" name="end_date" placeholder="End Date">
-                    </div>
-                    <div class="form-group">
                         <label for="due_date">Due Date</label>
                         <input type="date" class="form-control" id="due_date" name="due_date" placeholder="Due Date" required>
                     </div>
@@ -222,17 +217,6 @@ $admins = new Admins($dbh);
         });
     });
 
-    function updateEndDate(id) {
-        var startDate = $('#start_date-' + id).val();
-        if (startDate) {
-            var date = new Date(startDate);
-            date.setMonth(date.getMonth() + 1);
-            var year = date.getFullYear();
-            var month = ('0' + (date.getMonth() + 1)).slice(-2);
-            var day = ('0' + date.getDate()).slice(-2);
-            $('#end_date-' + id).val(year + '-' + month + '-' + day);
-        }
-    }
 
     // Load customer data
     function viewData(page, q, limit) {
@@ -286,13 +270,12 @@ $admins = new Admins($dbh);
         var employer = $('#emp-'+str).val();
         var start_date = $('#start_date-'+str).val();
         var due_date = $('#due_date-'+str).val();
-        var end_date = $('#end_date-'+str).val();
         var exceeding_payment = $('#exceeding_payment-'+str).val();
         
         $.ajax({
             method:"POST",
             url: "customers_approve.php?p=edit",
-            data: "full_name="+full_name+"&nid="+nid+"&account_number="+account_number+"&address="+address+"&conn_location="+conn_location+"&email="+email+"&package="+package+"&ip_address="+ip_address+"&conn_type="+conn_type+"&contact="+contact+"&employer="+employer+"&id="+id+"&start_date="+start_date+"&due_date="+due_date+"&end_date="+end_date+"&exceeding_payment="+exceeding_payment,
+            data: "full_name="+full_name+"&nid="+nid+"&account_number="+account_number+"&address="+address+"&conn_location="+conn_location+"&email="+email+"&package="+package+"&ip_address="+ip_address+"&conn_type="+conn_type+"&contact="+contact+"&employer="+employer+"&id="+id+"&start_date="+start_date+"&due_date="+due_date+"&exceeding_payment="+exceeding_payment,
             success: function (data){
                 viewData();
             }
