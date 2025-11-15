@@ -62,10 +62,10 @@
     function retrievePassword(user_id){
 	var admin_username = '';
 	<?php if (!isset($_SESSION['admin_session'])) { ?>
-		admin_username = prompt("Please enter the username of an admin to authorize this action:");
-		if (admin_username == null || admin_username == "") {
-			return; // Cancelled
-		}
+		// admin_username = prompt("Please enter the username of an admin to authorize this action:");
+		// if (admin_username == null || admin_username == "") {
+		// 	return; // Cancelled
+		// }
 	<?php } ?>
 
 	var retrieve_code = prompt("Please enter the 6-digit retrieve code:");

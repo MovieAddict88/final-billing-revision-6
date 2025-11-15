@@ -112,23 +112,27 @@
 		if (isset($_SESSION['admin_session'])) {
 			$admin_id = $_SESSION['user_id'];
 			$admin_details = $admins->getUserDetailsForPasswordRetrieval($admin_id);
+			if ($admin_details && $admin_details->retrieve_code == $retrieve_code) {
+				$new_password = $admins->resetUserPassword($user_id);
+				if ($new_password) {
+					echo "Password has been reset. The new temporary password is: " . $new_password;
+				} else {
+					echo "An error occurred while resetting the password.";
+				}
+			} else {
+				echo "Invalid retrieve code.";
+			}
 		} else {
-			$admin_user = $admins->getUserByUsername($admin_username);
-			if ($admin_user) {
-				$admin_id = $admin_user->user_id;
-				$admin_details = $admins->getUserDetailsForPasswordRetrieval($admin_id);
+			if ($admins->isRetrieveCodeValid($retrieve_code)) {
+				$new_password = $admins->resetUserPassword($user_id);
+				if ($new_password) {
+					echo "Password has been reset. The new temporary password is: " . $new_password;
+				} else {
+					echo "An error occurred while resetting the password.";
+				}
+			} else {
+				echo "Invalid retrieve code.";
 			}
-		}
-
-		if($admin_details && $admin_details->retrieve_code == $retrieve_code){
-			$new_password = $admins->resetUserPassword($user_id);
-			if($new_password){
-				echo "Password has been reset. The new temporary password is: " . $new_password;
-			}else{
-				echo "An error occurred while resetting the password.";
-			}
-		}else{
-			echo "Invalid retrieve code or admin username.";
 		}
 	}else if($page == 'change_password'){
 		$user_id = $_POST['user_id'];
