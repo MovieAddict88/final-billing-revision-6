@@ -785,11 +785,11 @@ public function countCustomersByEmployer($employer_id)
      * 
      */
     
-    public function addCustomer($full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $login_code, $employer_id, $start_date, $due_date, $end_date)
+    public function addCustomer($full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $login_code, $employer_id, $start_date, $due_date)
     {
-        $request = $this->dbh->prepare("INSERT INTO customers (`full_name`, `nid`, `account_number`, `address`, `conn_location`, `email`, `package_id`, `ip_address`, `conn_type`, `contact`, `login_code`, `employer_id`, `start_date`, `due_date`, `end_date`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+        $request = $this->dbh->prepare("INSERT INTO customers (`full_name`, `nid`, `account_number`, `address`, `conn_location`, `email`, `package_id`, `ip_address`, `conn_type`, `contact`, `login_code`, `employer_id`, `start_date`, `due_date`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
         // Do not forget to encrypt the pasword before saving
-        if ($request->execute([$full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $login_code, $employer_id, $start_date, $due_date, $end_date])) {
+        if ($request->execute([$full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $login_code, $employer_id, $start_date, $due_date])) {
             return $this->dbh->lastInsertId();
         }
         return false;
@@ -833,10 +833,10 @@ public function countCustomersByEmployer($employer_id)
     /**
      * Update Customers
      */
-    public function updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date)
+    public function updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date)
     {
-        $request = $this->dbh->prepare("UPDATE customers SET full_name =?, nid =?, account_number =?, address =?, conn_location= ?, email =?, package_id =?, ip_address=?, conn_type=?, contact=?, employer_id = ?, start_date = ?, due_date = ?, end_date = ? WHERE id =?");
-        $result = $request->execute([$full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date, $id]);
+        $request = $this->dbh->prepare("UPDATE customers SET full_name =?, nid =?, account_number =?, address =?, conn_location= ?, email =?, package_id =?, ip_address=?, conn_type=?, contact=?, employer_id = ?, start_date = ?, due_date = ? WHERE id =?");
+        $result = $request->execute([$full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $employer_id, $start_date, $due_date, $id]);
 
         return $result;
     }
@@ -2094,10 +2094,9 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
     public function billGenerate($customer_id, $r_month, $amount){
         try {
             $customer = $this->getCustomerInfo($customer_id);
-            if ($customer && !empty($customer->start_date) && !empty($customer->end_date)) {
+            if ($customer && !empty($customer->start_date)) {
                 $start_date = new DateTime($customer->start_date);
-                $end_date = new DateTime($customer->end_date);
-                $r_month = $start_date->format('F d') . ' - ' . $end_date->format('F d, Y');
+                $r_month = $start_date->format('F d, Y');
             }
 
             // $advance_balance = $this->getAdvancePaymentBalance($customer_id);

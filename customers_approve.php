@@ -25,7 +25,6 @@
 			$employer_id = $_POST['employer'];
 			$start_date = $_POST['start_date'];
 			$due_date = $_POST['due_date'];
-			$end_date = $_POST['end_date'];
 			$login_code = bin2hex(random_bytes(16));
 
 			if (isset($_POST)) 
@@ -33,16 +32,15 @@
 
 				$errors = array();
 				// Check if password are the same
-				$customer_id = $admins->addCustomer($full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $login_code, $employer_id, $start_date, $due_date, $end_date);
+				$customer_id = $admins->addCustomer($full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address, $conn_type, $contact, $login_code, $employer_id, $start_date, $due_date);
 				if ($customer_id)
 				{
 					$packageInfo = $admins->getPackageInfo($package);
 					$amount = $packageInfo->fee;
 					$r_month = date('F');
-					if (!empty($start_date) && !empty($end_date)) {
+					if (!empty($start_date)) {
 						$start_date_obj = new DateTime($start_date);
-						$end_date_obj = new DateTime($end_date);
-						$r_month = $start_date_obj->format('F d') . ' - ' . $end_date_obj->format('F d, Y');
+						$r_month = $start_date_obj->format('F d, Y');
 					}
 					$admins->billGenerate($customer_id, $r_month, $amount);
 					session::set('confirm', 'New customer added successfully!');
@@ -75,27 +73,24 @@
 		$employer_id = $_POST['employer'];
 		$start_date = $_POST['start_date'];
 		$due_date = $_POST['due_date'];
-		$end_date = $_POST['end_date'];
 
 		$customerInfo = $admins->getCustomerInfo($id);
 		$old_start_date = $customerInfo ? $customerInfo->start_date : null;
-        $old_end_date = $customerInfo ? $customerInfo->end_date : null;
 
-		if (!$admins->updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address,  $conn_type, $contact, $employer_id, $start_date, $due_date, $end_date))
+		if (!$admins->updateCustomer($id, $full_name, $nid, $account_number, $address, $conn_location, $email, $package, $ip_address,  $conn_type, $contact, $employer_id, $start_date, $due_date))
 		{	
 			//echo "$id $customername $email $full_name $address $contact";
 			echo "Sorry Data could not be Updated !";
 		}else {
-			if ($customerInfo && ($start_date != $old_start_date || $end_date != $old_end_date)) {
+			if ($customerInfo && ($start_date != $old_start_date)) {
 				$packageInfo = $admins->getPackageInfo($package);
 				$amount = $packageInfo->fee;
 
 				// Format the month range for the bill
 				$r_month = date('F');
-				if (!empty($start_date) && !empty($end_date)) {
+				if (!empty($start_date)) {
 					$start_date_obj = new DateTime($start_date);
-					$end_date_obj = new DateTime($end_date);
-					$r_month = $start_date_obj->format('F d') . ' - ' . $end_date_obj->format('F d, Y');
+					$r_month = $start_date_obj->format('F d, Y');
 				}
 
 				// Generate a new bill
@@ -183,10 +178,6 @@
 											<div class="form-group">
 												<label for="start_date">Start Date</label>
 												<input type="date" class="form-control" id="start_date-<?=$customer->id?>"   value="<?=$customer->start_date?>" required onchange="updateEndDate(<?=$customer->id?>)">
-											</div>
-											<div class="form-group">
-												<label for="end_date">End Date</label>
-												<input type="date" class="form-control" id="end_date-<?=$customer->id?>"   value="<?=$customer->end_date?>">
 											</div>
 											<div class="form-group">
 												<label for="due_date">Due Date</label>
@@ -297,7 +288,6 @@
                     <td class="search"><?=isset($customer->advance_payment) ? number_format($customer->advance_payment, 2) : '0.00'?></td>
 					<td class="search"><?=$customer->login_code?></td>
 					<td class="search"><?=$customer->start_date?></td>
-					<td class="search"><?=$customer->end_date?></td>
 					<td class="search"
 						<?php
 						echo $style;
