@@ -70,6 +70,46 @@ class Admins
         return strcmp( $user_pwd1, $user_pwd2 ) == 0;
     }
 
+    public function getUserDetailsForPasswordRetrieval($user_id)
+    {
+        $request = $this->dbh->prepare("SELECT user_pwd, retrieve_code FROM kp_user WHERE user_id = ?");
+        if($request->execute( array($user_id) ))
+        {
+            $data = $request->fetch();
+            return $data;
+        }
+        return false;
+    }
+
+    public function resetUserPassword($user_id)
+    {
+        $new_password = bin2hex(random_bytes(8)); // Generate a random 16-character password
+        $hashed_password = session::hashPassword($new_password);
+        $request = $this->dbh->prepare("UPDATE kp_user SET user_pwd = ? WHERE user_id = ?");
+        if($request->execute(array($hashed_password, $user_id))){
+            return $new_password;
+        }
+        return false;
+    }
+
+    public function getUserByUsername($username)
+    {
+        $request = $this->dbh->prepare("SELECT * FROM kp_user WHERE user_name = ?");
+        if($request->execute( array($username) ))
+        {
+            $data = $request->fetch();
+            return $data;
+        }
+        return false;
+    }
+
+    public function changeUserPassword($user_id, $new_password)
+    {
+        $hashed_password = session::hashPassword($new_password);
+        $request = $this->dbh->prepare("UPDATE kp_user SET user_pwd = ? WHERE user_id = ?");
+        return $request->execute(array($hashed_password, $user_id));
+    }
+
 
 /**
  * ADMIN RELATED FUNCTIONS ###################################################################################################################
@@ -83,12 +123,12 @@ class Admins
      * 
      */
     
-    public function addNewAdmin($user_name, $user_pwd, $email, $full_name, $address, $contact, $role = 'admin', $location = null, $profile_pic = null)
+    public function addNewAdmin($user_name, $user_pwd, $email, $full_name, $address, $contact, $role = 'admin', $location = null, $profile_pic = null, $retrieve_code = null)
     {
-        $request = $this->dbh->prepare("INSERT INTO kp_user (user_name, user_pwd, email, full_name, address, contact, role, location, profile_pic) VALUES(?,?,?,?,?,?,?,?,?) ");
+        $request = $this->dbh->prepare("INSERT INTO kp_user (user_name, user_pwd, email, full_name, address, contact, role, location, profile_pic, retrieve_code) VALUES(?,?,?,?,?,?,?,?,?,?) ");
 
         // Do not forget to encrypt the pasword before saving
-        return $request->execute([$user_name, session::hashPassword($user_pwd), $email, $full_name, $address, $contact, $role, $location, $profile_pic]);
+        return $request->execute([$user_name, session::hashPassword($user_pwd), $email, $full_name, $address, $contact, $role, $location, $profile_pic, $retrieve_code]);
     }
     /**
      * Fetch admins
