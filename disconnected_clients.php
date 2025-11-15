@@ -11,7 +11,7 @@ require_once "includes/classes/admin-class.php";
 $admins = new Admins($dbh);
 
 $user_role = $_SESSION['user_role'];
-$is_admin = ($user_role == 'admin');
+$is_admin = ($user_role == 'admin' || $user_role == 'employer');
 ?>
 
 <div class="dashboard" style="margin-top: 50px;">
@@ -19,9 +19,6 @@ $is_admin = ($user_role == 'admin');
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4>Disconnected Clients</h4>
-                <div class="pull-right">
-                    <a href="customers.php" style="margin-top: 20px;" class="btn btn-primary">Back to Active Customers</a>
-                </div>
             </div>
             <div class="panel-body">
                 <?php if (isset($_SESSION['success'])) { ?>
@@ -41,20 +38,19 @@ $is_admin = ($user_role == 'admin');
                     unset($_SESSION['errors']);
                 } ?>
                 
-                <?php if ($is_admin) : ?>
-                    <div class="col-md-6">
-                        <form class="form-inline pull-right">
-                            <div class="form-group">
-                                <label class="sr-only" for="search">Search for</label>
-                                <div class="input-group">
-                                    <div class="input-group-addon"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></div>
-                                    <input type="text" class="form-control" id="search" placeholder="Type a name" list="global-suggestions" autocomplete="off">
-                                    <div class="input-group-addon"></div>
-                                </div>
+                <div class="pull-right form-inline">
+                    <?php if ($is_admin) : ?>
+                        <div class="form-group">
+                            <label class="sr-only" for="search">Search for</label>
+                            <div class="input-group">
+                                <div class="input-group-addon"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></div>
+                                <input type="text" class="form-control" id="search" placeholder="Type a name" list="global-suggestions" autocomplete="off">
+                                <div class="input-group-addon"></div>
                             </div>
-                        </form>
-                    </div>
-                <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
+                    <a href="customers.php" class="btn btn-primary">Back to Active Customers</a>
+                </div>
             </div>
             <div class="table-responsive" style="overflow-x: auto; margin-top: 50px;  -webkit-overflow-scrolling: touch;">
                 <table class="table table-striped table-bordered" id="grid-basic" style="min-width: 1200px; width: 100%;">
