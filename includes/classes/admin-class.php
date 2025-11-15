@@ -1715,6 +1715,9 @@ public function fetchCustomersPage($offset = 0, $limit = 10, $query = null)
                 $payment_for_this_bill = min($remaining_amount, $due_amount);
                 $r_month = isset($r_months[$bill_id]) ? $r_months[$bill_id] : $bill->r_month;
 
+                // Update the r_month in the payments table immediately
+                $update_r_month_request = $this->dbh->prepare("UPDATE payments SET r_month = ? WHERE id = ?");
+                $update_r_month_request->execute([$r_month, $bill_id]);
 
                 // Create a submission item for each bill
                 $item_request = $this->dbh->prepare(
